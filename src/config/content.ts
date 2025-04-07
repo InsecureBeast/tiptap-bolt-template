@@ -1,0 +1,1 @@
+export const content = `Default content for the page.`;

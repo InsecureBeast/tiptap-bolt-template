@@ -1,19 +1,20 @@
-import React, { useState } from 'react'
-import RichTextEditor from './components/RichTextEditor'
+import { useState } from 'react'
+//import RichTextEditor from './components/RichTextEditor'
+import Editor from './components/Editor'
 
 function App() {
-  const [content, setContent] = useState<string>('')
+  //const [content, setContent] = useState<string>('')
 
-  const handleContentChange = (newContent: string) => {
-    setContent(newContent)
-    console.log('Текущее содержимое:', newContent)
-  }
+  // const handleContentChange = (newContent: string) => {
+  //   setContent(newContent)
+  //   console.log('Текущее содержимое:', newContent)
+  // }
 
   return (
     <div className="h-screen">
-      <RichTextEditor 
-        onChange={handleContentChange}
-        initialContent="<h1>Привет, мир!</h1><p>Это блокнот-редактор.</p>"
+      <Editor 
+        //onChange={handleContentChange}
+        //initialContent="<h1>Привет, мир!</h1><p>Это блокнот-редактор.</p>"
       />
     </div>
   )
