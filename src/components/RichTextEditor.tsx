@@ -27,6 +27,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           HTMLAttributes: {
             class: 'text-gray-800'
           }
+        },
+        heading: {
+          levels: [1, 2, 3, 4]
         }
       }),
       Highlight,
