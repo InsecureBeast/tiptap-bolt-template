@@ -1,0 +1,1 @@
+# tiptap-bolt-template
