@@ -13,7 +13,8 @@
   padding: 1rem 2rem;
   min-height: calc(100vh - 100px);
   height: 100%;
-  line-height: 1rem;
+  line-height: 1.6rem;
+  background-color: white;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -65,14 +66,5 @@
 
   blockquote {
     @apply border-l-4 border-gray-300 pl-4 italic text-gray-600;
-  }
-}
-
-/* Highlight and Color Extensions */
-.tiptap {
-  mark {
-    background-color: #ffd54f;
-    border-radius: 0.25rem;
-    padding: 0.125rem 0.25rem;
   }
 }

@@ -4,18 +4,18 @@ import StarterKit from "@tiptap/starter-kit"
 import MenuBar from "./MenuBar/MenuBar"
 import { FormEventHandler } from "react";
 
-export default ({ onChange, initialContent }: { onChange: FormEventHandler<HTMLDivElement>; initialContent: string }) => {
+export default ({ onChange, content }: { onChange: FormEventHandler<HTMLDivElement>; content: HTMLElement | undefined }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
     ],
-    content: initialContent,
+    content: content,
     editorProps: {
       attributes: {
         spellcheck: 'false',
       },
     },
-  })
+  }, [content])
 
   return (
     <>
