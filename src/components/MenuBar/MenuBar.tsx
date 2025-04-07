@@ -120,7 +120,8 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   return (
     <div className="flex items-center justify-start bg-gray-100 p-2 border-b border-gray-300 shadow-sm sticky top-0 z-10">
       <div className="flex space-x-1 overflow-x-auto">
-        <MenuBarButton 
+        <MenuBarButton
+          key={"undoButton"} 
           icon={Undo} 
           onClick={() => editor.chain().focus().undo().run()} 
           isActive={false} 
@@ -128,6 +129,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
           title="Undo"/>
 
         <MenuBarButton 
+          key={"redoButton"} 
           icon={Redo} 
           onClick={() => editor.chain().focus().redo().run()} 
           isActive={false} 
@@ -138,6 +140,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
 
       {headingItems.map(({ icon: Icon, onClick, isActive, title }, index) => (
         <MenuBarButton 
+          key={`headingButton${index}`} 
           icon={Icon} 
           onClick={onClick} 
           isActive={isActive} 
@@ -149,6 +152,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       
       {listItems.map(({ icon: Icon, onClick, isActive, title }, index) => (
         <MenuBarButton 
+          key={`listButton${index}`}
           icon={Icon} 
           onClick={onClick} 
           isActive={isActive} 
@@ -157,23 +161,27 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       ))}
 
       <MenuBarButton 
-          icon={Braces} 
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()} 
-          isActive={editor.isActive('codeBlock')} 
-          index={15}
-          title='Code block'/>
+        key={`codeBlockButton`}
+        icon={Braces} 
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()} 
+        isActive={editor.isActive('codeBlock')} 
+        index={15}
+        title='Code block'/>
+
       <MenuBarButton
-          icon={TextQuote}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          isActive={editor.isActive('blockquote')}
-          index={16}
-          title='Quote' 
+        key={`blockquoteButton`}
+        icon={TextQuote}
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        isActive={editor.isActive('blockquote')}
+        index={16}
+        title='Quote' 
       /> 
 
       <MenuBarSeparator />
       
       {formatItems.map(({ icon: Icon, onClick, isActive, title }, index) => (
         <MenuBarButton 
+          key={`formatButton${index}`}
           icon={Icon} 
           onClick={onClick} 
           isActive={isActive} 
@@ -184,6 +192,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       <MenuBarSeparator />
 
       <MenuBarButton
+        key={`lineButton`}
         icon={Minus} 
         onClick={() => editor.chain().focus().setHorizontalRule().run()} 
         isActive={false} 
@@ -191,11 +200,12 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         title='Add line'/>
 
       <MenuBarButton
+        key={`hardBreakButton`}
         icon={CornerDownLeft} 
         onClick={() => editor.chain().focus().setHardBreak().run()} 
         isActive={false} 
         index={18}
-        title='Add hardbreake'/>
+        title='Add hardbreak'/>
       </div>
     </div>
   )

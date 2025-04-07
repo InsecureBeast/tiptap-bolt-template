@@ -1,15 +1,15 @@
 import { EditorContent, useEditor } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 
-import { content } from '../config/content'
 import MenuBar from "./MenuBar/MenuBar"
+import { FormEventHandler } from "react";
 
-export default () => {
+export default ({ onChange, initialContent }: { onChange: FormEventHandler<HTMLDivElement>; initialContent: string }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
     ],
-    content,
+    content: initialContent,
     editorProps: {
       attributes: {
         spellcheck: 'false',
@@ -19,8 +19,8 @@ export default () => {
 
   return (
     <>
-      <MenuBar editor={editor} />
-      <EditorContent editor={editor} />
+      <MenuBar editor={editor} key="menubar"/>
+      <EditorContent editor={editor} onChange={onChange} />
     </>
   )
 }

@@ -12,7 +12,7 @@ export interface IMenuBarButtonProps {
 const MenuBarButton: React.FC<IMenuBarButtonProps> = ({ index, onClick, isActive, title, icon: Icon}) => {
   return (
     <button
-      key={index}
+      key={`${index}`}
       onClick={onClick}
       title={title}
       className={`
