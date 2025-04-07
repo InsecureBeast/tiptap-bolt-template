@@ -19,8 +19,13 @@ export default ({ onChange, content }: { onChange: FormEventHandler<HTMLDivEleme
 
   return (
     <>
-      <MenuBar editor={editor} key="menubar"/>
-      <EditorContent editor={editor} onChange={onChange} />
+      <MenuBar editor={editor} key="menubar" />
+      <EditorContent editor={editor} onInput={(event) => {
+        if (onChange)
+          onChange(event);
+        }
+      }
+      />
     </>
   )
 }
