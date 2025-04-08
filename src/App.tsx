@@ -7,24 +7,9 @@ function App() {
 
   const handleContentChange = async (event: React.FormEvent<HTMLDivElement>) => {
     const newContent = event.currentTarget.innerHTML;
-    setCurrentContent(newContent);
+    localStorage.setItem('currentContent', newContent);
+    //setCurrentContent(newContent);
     console.log('Текущее содержимое:', newContent);
-
-    try {
-      const response = await fetch('/data.json', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: newContent })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update content');
-      }
-    } catch (error) {
-      console.error('Error updating content:', error);
-    }
   }
 
   useEffect(() => {
@@ -33,7 +18,11 @@ function App() {
       try {
         const response = await fetch('../public/data.json');
         const data = await response.json();
-        setCurrentContent(data.content);
+        const storedContent = localStorage.getItem('currentContent');
+        if (storedContent !== data.content) {
+          setCurrentContent(data.content);
+          localStorage.setItem('currentContent', data.content);
+        }
       } catch (error) {
         console.error('Error loading content:', error);
       }

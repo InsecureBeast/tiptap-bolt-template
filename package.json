@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tiptap/extension-character-count": "^2.3.0",
+    "@tiptap/extension-character-count": "^2.11.7",
     "@tiptap/extension-color": "^2.3.0",
     "@tiptap/extension-highlight": "^2.3.0",
     "@tiptap/extension-placeholder": "^2.11.7",
