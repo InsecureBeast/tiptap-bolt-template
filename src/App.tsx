@@ -31,9 +31,9 @@ function App() {
     loadContent();
 
     // Poll for changes every 2 seconds
-    const interval = setInterval(loadContent, 2000);
+    //const interval = setInterval(loadContent, 2000);
 
-    return () => clearInterval(interval);
+    //return () => clearInterval(interval);
   }, []);
 
   return (

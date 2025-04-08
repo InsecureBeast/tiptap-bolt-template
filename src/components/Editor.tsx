@@ -5,6 +5,7 @@ import MenuBar from "./MenuBar/MenuBar"
 import { FormEventHandler } from "react";
 import Placeholder from "@tiptap/extension-placeholder";
 import CharacterCount from "@tiptap/extension-character-count";
+import EditorBubbleMenu from "./BubbleMenu/BubbleMenu";
 
 export default ({ onChange, content }: { onChange: FormEventHandler<HTMLDivElement>; content: string | undefined }) => {
   const editor = useEditor({
@@ -29,6 +30,7 @@ export default ({ onChange, content }: { onChange: FormEventHandler<HTMLDivEleme
   return (
     <>
       <MenuBar editor={editor} key="menubar" />
+      <EditorBubbleMenu editor={editor} key="editormenu" />
       <EditorContent editor={editor} onInput={(event) => {
         if (onChange)
           onChange(event);
