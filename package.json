@@ -13,12 +13,14 @@
     "@tiptap/extension-character-count": "^2.3.0",
     "@tiptap/extension-color": "^2.3.0",
     "@tiptap/extension-highlight": "^2.3.0",
+    "@tiptap/extension-placeholder": "^2.11.7",
     "@tiptap/extension-text-style": "^2.3.0",
     "@tiptap/react": "^2.3.0",
     "@tiptap/starter-kit": "^2.3.0",
     "lucide-react": "^0.378.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-joyride": "^2.9.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

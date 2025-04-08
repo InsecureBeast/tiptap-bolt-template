@@ -1,13 +1,30 @@
 import { useEffect, useState } from 'react'
 import Editor from './components/Editor'
+import Onboarding from './components/Onbording/Onbording';
 
 function App() {
-  const [currentContent, setCurrentContent] = useState<HTMLDivElement>()
+  const [currentContent, setCurrentContent] = useState<string>()
 
-  const handleContentChange = (event: React.FormEvent<HTMLDivElement>) => {
-    const newContent = event.currentTarget;
+  const handleContentChange = async (event: React.FormEvent<HTMLDivElement>) => {
+    const newContent = event.currentTarget.innerHTML;
     setCurrentContent(newContent);
     console.log('Текущее содержимое:', newContent);
+
+    try {
+      const response = await fetch('/data.json', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: newContent })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update content');
+      }
+    } catch (error) {
+      console.error('Error updating content:', error);
+    }
   }
 
   useEffect(() => {
@@ -32,6 +49,7 @@ function App() {
 
   return (
     <div className="h-screen">
+      <Onboarding />
       <Editor onChange={handleContentChange} content={currentContent} key="editor"/>
     </div>
   )

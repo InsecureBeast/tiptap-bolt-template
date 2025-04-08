@@ -119,7 +119,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
 
   return (
     <div className="flex items-center justify-start bg-gray-100 p-2 border-b border-gray-300 shadow-sm sticky top-0 z-10">
-      <div className="flex space-x-1 overflow-x-auto">
+      <div className="flex space-x-1 overflow-x-auto" id="editorToolbar">
         <MenuBarButton
           key={"undoButton"} 
           icon={Undo} 
