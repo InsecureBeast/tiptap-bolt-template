@@ -20,7 +20,7 @@ const MenuButton: React.FC<IMenuButtonProps> = ({ index, onClick, isActive, titl
       p-2 rounded-md transition-all duration-200 flex items-center justify-center
         ${
           isActive
-          ? 'bg-violet-200 '
+          ? 'bg-violet-200'
           : 'bg-transparent text-gray-700 hover:bg-gray-200 active:bg-gray-300'
         }
       `}

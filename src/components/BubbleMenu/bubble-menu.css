@@ -1,0 +1,9 @@
+/* Fix Bubble Menu Width */
+.tippy-box {
+  max-width: none !important;
+}
+
+.tippy-content {
+  max-width: none !important;
+  padding: 0 !important;
+}
