@@ -4,6 +4,7 @@ import {
   MessageSquare,
   Languages
 } from 'lucide-react'
+import { useState } from 'react'
 import MenuBarDropDown, { IDropdownItem } from '../MenuBar/MenuBarDropDown'
 
 interface AiMenuProps {
@@ -17,11 +18,27 @@ const aiItems: IDropdownItem[] = [
 ]
 
 export default function AiBubbleMenu({ editor }: AiMenuProps) {
-  const handleAiAction = async (item: IDropdownItem) => {
-    const selectedText = editor?.state.selection.content().content.firstChild?.text
-    if (!selectedText) return
+  const [isLoading, setIsLoading] = useState(false)
 
+  const handleAiAction = async (item: IDropdownItem) => {
     try {
+      setIsLoading(true)
+      
+      const { empty } = editor.state.selection;
+      const { from, to } = editor.state.selection
+
+      // TODO  add spiner
+      // if (!empty) {
+      //   editor.chain()
+      //         .focus()
+      //         .setTextSelection({ from, to })
+      //         .insertContent('<span class="loading-text absolute">обработка...</span>')
+      //         .run();
+      // }
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
       let aiResponse = ''
       switch (item.id) {
         case 1:
@@ -37,20 +54,23 @@ export default function AiBubbleMenu({ editor }: AiMenuProps) {
           aiResponse = 'Обработанный текст...'
       }
       
-      editor?.chain()
+      editor.chain()
         .focus()
+        .setTextSelection({ from, to })
         .insertContent(aiResponse)
         .run()
         
     } catch (error) {
       console.error('Error processing AI request:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <MenuBarDropDown
       items={aiItems}
-      isActive={false}
+      isActive={isLoading}
       selectId={1}
       onSelect={handleAiAction}
       title="Ask AI"

@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.1",
     "@tiptap/extension-character-count": "^2.11.7",
     "@tiptap/extension-color": "^2.3.0",
     "@tiptap/extension-highlight": "^2.3.0",
@@ -17,7 +18,9 @@
     "@tiptap/extension-text-style": "^2.3.0",
     "@tiptap/react": "^2.3.0",
     "@tiptap/starter-kit": "^2.3.0",
+    "ai": "^4.3.4",
     "lucide-react": "^0.378.0",
+    "openai": "^4.93.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-joyride": "^2.9.3"
