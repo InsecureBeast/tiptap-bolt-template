@@ -43,18 +43,21 @@ export async function streamText({
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || ''
       accumulatedText += content
-      
-      if (selection)
-        editor.chain()
-          .focus()
-          .setTextSelection(selection)
-          .insertContent(accumulatedText, { updateSelection: true})
-          .run()
-      else 
+
+      if (selection) {
       editor.chain()
-            .focus()
-            .insertContent(accumulatedText, { updateSelection: true})
-            .run()
+        .focus()
+        .insertContent(content, { updateSelection: true })
+        .run()
+      } else {
+      editor.chain()
+        .focus()
+        .insertContent(content, { updateSelection: true })
+        .run()
+      }
+
+      // Add a small delay to simulate rendering before processing the next chunk
+      await new Promise(resolve => setTimeout(resolve, 10))
     }
 
     onFinish?.()

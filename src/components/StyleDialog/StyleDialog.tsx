@@ -11,7 +11,7 @@ interface StyleDialogProps {
   onApply: (styleName: string, styleContent: string) => void
 }
 
-interface SavedStyle {
+export interface SavedStyle {
   name: string
   content: string
   tov?: string

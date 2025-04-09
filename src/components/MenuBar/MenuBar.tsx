@@ -1,12 +1,12 @@
 import { Editor } from '@tiptap/react'
-import { Braces, CornerDownLeft, Minus, Redo, TextQuote, Undo, Palette } from 'lucide-react'
+import { Braces, CornerDownLeft, Minus, Redo, TextQuote, Undo, Palette, FileText } from 'lucide-react'
 import { useState } from 'react'
 import MenuButton from '../MenuButton'
 import MenuSeparator from '../MenuSeparator'
 import { getFormatItems, getHeadingItems, getListItems } from '../Editor/MenuButtonLists'
-import StyleDialog from '../StyleDialog/StyleDialog'
-import { generateAiResponse } from '../../services/ai.service'
-import { prompt as stylePrompt } from '../../prompts/style.prompt'
+import StyleDialog, { SavedStyle } from '../StyleDialog/StyleDialog'
+import { getPrompt } from '../../prompts/generator.prompt'
+import { streamText } from '../../services/ai.service'
 
 interface MenuBarProps {
   editor: Editor | null
@@ -14,18 +14,45 @@ interface MenuBarProps {
 
 const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
 
   if (!editor) {
     return null
   }
 
-  const handleStyleApply = async (styleName: string, styleContent: string) => {
-    // Here you can handle the style application
-    const styleTov = await generateAiResponse({systemPrompt: stylePrompt, prompt: styleContent});
-    if (styleTov)
-      localStorage.setItem("tov", styleTov);
+  const handleGenerateText = async () => {
+    if (isGenerating) 
+      return;
     
-    console.log('Applying style:', { styleName, styleContent })
+    setIsGenerating(true);
+
+    const savedStyles = localStorage.getItem('savedStyles')
+    let tov = undefined;
+    if (savedStyles) {
+      const styles = JSON.parse(savedStyles) as SavedStyle[]
+      if (styles.length > 0) {
+        const lastStyle = styles[styles.length - 1];
+        tov = lastStyle.tov;
+      }
+    }
+
+    try {
+      // remove all content before
+      editor.commands.setContent("");
+
+      await streamText({
+        prompt: "Напиши текст для поста в телеграме",
+        systemPrompt: getPrompt(tov || "", "", "", "", ""),
+        editor,
+        selection: editor.state.selection,
+        onStart: () => setIsGenerating(true),
+        onFinish: () => setIsGenerating(false),
+        onError: () => setIsGenerating(false)
+      });
+    } catch (error) {
+      console.error('Error generating text:', error);
+      setIsGenerating(false);
+    }
   }
 
   return (
@@ -33,6 +60,18 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       <div className="flex items-center justify-start bg-gray-100 p-2 border-b 
                     border-gray-300 shadow-sm sticky top-0 z-10">
         <div className="flex flex-wrap flex-row space-x-1" id="editorToolbar">
+          <MenuButton
+            key="generateButton"
+            icon={FileText}
+            onClick={handleGenerateText}
+            isActive={isGenerating}
+            index={20}
+            tooltip="Сгенерировать текст"
+            title="Сгенерировать текст"
+          />
+
+          <MenuSeparator />
+
           <MenuButton
             key={"undoButton"} 
             icon={Undo} 
@@ -136,7 +175,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       <StyleDialog 
         isOpen={isStyleDialogOpen}
         onClose={() => setIsStyleDialogOpen(false)}
-        onApply={handleStyleApply}
+        onApply={() => {}}
       />
     </>
   )
