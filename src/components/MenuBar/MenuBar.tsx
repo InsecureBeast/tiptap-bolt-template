@@ -66,7 +66,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
             onClick={handleGenerateText}
             isActive={isGenerating}
             index={20}
-            tooltip="Сгенерировать текст"
+            tooltip=""
             title="Сгенерировать текст"
           />
 

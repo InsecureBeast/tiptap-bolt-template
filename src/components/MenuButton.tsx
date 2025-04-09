@@ -15,7 +15,8 @@ const MenuButton: React.FC<IMenuButtonProps> = ({ index, onClick, isActive, titl
     <button
       key={`${index}`}
       onClick={onClick}
-      title={tooltip}
+      title={title}
+      data-tooltip={tooltip}
       className={`
       p-2 rounded-md transition-all duration-200 flex items-center justify-center
         ${
