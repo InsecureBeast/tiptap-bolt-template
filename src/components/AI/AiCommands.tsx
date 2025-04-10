@@ -2,7 +2,6 @@ import { Editor } from '@tiptap/react'
 import { Check, FileText } from 'lucide-react'
 import { useState } from 'react'
 import MenuButton from '../MenuButton'
-import MenuSeparator from '../MenuSeparator'
 import { AiCommandsService } from '../../services/ai-commands.service'
 
 interface AiCommandsProps {

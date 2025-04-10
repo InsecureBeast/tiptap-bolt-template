@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, LucideIcon } from "lucide-react";
+import LoadingSpinner from "../Spiner";
 
 export interface IDropdownItem {
   id: number;
@@ -15,9 +16,19 @@ interface IDropDownProps {
   title: string | undefined;
   isChangeSelected: boolean;
   icon: LucideIcon;
+  isLoading?: boolean;
 }
 
-const MenuBarDropDown: React.FC<IDropDownProps> = ({ items, onSelect, isActive, selectId, title, isChangeSelected, icon: Icon }) => {
+const MenuBarDropDown: React.FC<IDropDownProps> = ({ 
+  items, 
+  onSelect, 
+  isActive, 
+  selectId, 
+  title, 
+  isChangeSelected, 
+  icon: Icon,
+  isLoading = false 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<IDropdownItem | null>(() => {
     if (selectId) {
@@ -53,8 +64,6 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({ items, onSelect, isActive, 
   }, []);
 
   useEffect(() => {
-    console.log("Selected item changed:", selectedItem);
-    console.log("Select ID changed:", selectId);
     if (!isChangeSelected)
       return;
 
@@ -80,10 +89,10 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({ items, onSelect, isActive, 
           </span>
         ) : (
           <>
-          <span className="mr-2">
-            <Icon size={20} />
-          </span>
-          {title ?? (<span className="text-sm text-gray-700">{title}</span>)}
+            <span className="mr-2">
+              {isLoading ? <LoadingSpinner /> : <Icon size={20} />}
+            </span>
+            {title && <span className="text-sm text-gray-700">{title}</span>}
           </>
         )}
 
@@ -91,7 +100,7 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({ items, onSelect, isActive, 
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden w-48">
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden w-64">
           {items.map((item) => (
             <button
               key={item.id}
@@ -99,10 +108,8 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({ items, onSelect, isActive, 
               className={`w-full text-left px-4 py-2 flex items-center hover:bg-gray-100 transition-colors duration-200 
                 ${isChangeSelected && selectedItem?.id === item.id ? "bg-violet-200" : "text-gray-700"}`}
             >
-              <span className="mr-2">
-                <item.icon size={16} />
-              </span>
-              {item.title}
+              <span className="mr-2"><item.icon size={16} /></span>
+              <span className="text-nowrap">{item.title}</span>
             </button>
           ))}
         </div>
