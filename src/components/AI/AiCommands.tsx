@@ -66,7 +66,7 @@ export default function AiCommands({ editor }: AiCommandsProps) {
         isActive={isChecking}
         isLoading={isChecking}
         index={21}
-        tooltip="Проверить правописание"
+        tooltip="Проверить на ошибки"
       />
 
       <MenuButton

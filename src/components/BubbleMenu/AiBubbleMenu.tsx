@@ -14,7 +14,7 @@ interface AiMenuProps {
 
 const aiItems: IDropdownItem[] = [
   { id: 1, title: 'Переписать', icon: Sparkles },
-  { id: 2, title: 'Проверить правописание', icon: Check },
+  { id: 2, title: 'Проверить на ошибки', icon: Check },
   { id: 3, title: 'Структурировать текст', icon: AlignJustify },
 ]
 
