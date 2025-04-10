@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import React from 'react';
+import LoadingSpinner from './Spiner';
 
 export interface IMenuButtonProps {
   index: number;
@@ -8,9 +9,18 @@ export interface IMenuButtonProps {
   icon: LucideIcon;
   tooltip: string;
   title?: string;
+  isLoading?: boolean;
 }
 
-const MenuButton: React.FC<IMenuButtonProps> = ({ index, onClick, isActive, title, icon: Icon, tooltip}) => {
+const MenuButton: React.FC<IMenuButtonProps> = ({ 
+  index, 
+  onClick, 
+  isActive, 
+  title, 
+  icon: Icon, 
+  tooltip,
+  isLoading = false
+}) => {
   return (
     <button
       key={`${index}`}
@@ -26,8 +36,17 @@ const MenuButton: React.FC<IMenuButtonProps> = ({ index, onClick, isActive, titl
         }
       `}
     >
-      <Icon size={20} className={`text-gray-600`}/>
-      {title && <span className='text-nowrap text-sm ms-1'>{title}</span>}
+      {isLoading ? (
+        <>
+          <LoadingSpinner />
+          {title && <span className='text-nowrap text-sm ms-1'>{title}</span>}
+        </>
+      ) : (
+        <>
+          <Icon size={20} className={`text-gray-600`}/>
+          {title && <span className='text-nowrap text-sm ms-1'>{title}</span>}
+        </>
+      )}
     </button>
   );
 };

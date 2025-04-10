@@ -57,7 +57,7 @@ export async function streamText({
       }
 
       // Add a small delay to simulate rendering before processing the next chunk
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise(resolve => setTimeout(resolve, 5))
     }
 
     onFinish?.()

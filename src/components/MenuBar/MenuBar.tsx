@@ -1,12 +1,11 @@
 import { Editor } from '@tiptap/react'
-import { Braces, CornerDownLeft, Minus, Redo, TextQuote, Undo, Palette, FileText } from 'lucide-react'
+import { Braces, CornerDownLeft, Minus, Redo, TextQuote, Undo, Palette } from 'lucide-react'
 import { useState } from 'react'
 import MenuButton from '../MenuButton'
 import MenuSeparator from '../MenuSeparator'
 import { getFormatItems, getHeadingItems, getListItems } from '../Editor/MenuButtonLists'
-import StyleDialog, { SavedStyle } from '../StyleDialog/StyleDialog'
-import { getPrompt } from '../../prompts/generator.prompt'
-import { streamText } from '../../services/ai.service'
+import StyleDialog from '../StyleDialog/StyleDialog'
+import AiCommands from '../AI/AiCommands'
 
 interface MenuBarProps {
   editor: Editor | null
@@ -14,45 +13,9 @@ interface MenuBarProps {
 
 const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
 
   if (!editor) {
     return null
-  }
-
-  const handleGenerateText = async () => {
-    if (isGenerating) 
-      return;
-    
-    setIsGenerating(true);
-
-    const savedStyles = localStorage.getItem('savedStyles')
-    let tov = undefined;
-    if (savedStyles) {
-      const styles = JSON.parse(savedStyles) as SavedStyle[]
-      if (styles.length > 0) {
-        const lastStyle = styles[styles.length - 1];
-        tov = lastStyle.tov;
-      }
-    }
-
-    try {
-      // remove all content before
-      editor.commands.setContent("");
-
-      await streamText({
-        prompt: "Напиши текст для поста в телеграме",
-        systemPrompt: getPrompt(tov || "", "", "", "", ""),
-        editor,
-        selection: editor.state.selection,
-        onStart: () => setIsGenerating(true),
-        onFinish: () => setIsGenerating(false),
-        onError: () => setIsGenerating(false)
-      });
-    } catch (error) {
-      console.error('Error generating text:', error);
-      setIsGenerating(false);
-    }
   }
 
   return (
@@ -60,68 +23,65 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       <div className="flex items-center justify-start bg-gray-100 p-2 border-b 
                     border-gray-300 shadow-sm sticky top-0 z-10">
         <div className="flex flex-wrap flex-row space-x-1" id="editorToolbar">
-          <MenuButton
-            key="generateButton"
-            icon={FileText}
-            onClick={handleGenerateText}
-            isActive={isGenerating}
-            index={20}
-            tooltip=""
-            title="Сгенерировать текст"
-          />
+          <AiCommands editor={editor} />
 
-          <MenuSeparator />
+          <MenuSeparator key="sep1" />
 
           <MenuButton
-            key={"undoButton"} 
+            key="undo"
             icon={Undo} 
             onClick={() => editor.chain().focus().undo().run()} 
             isActive={false} 
             index={13}
-            tooltip="Undo"/>
+            tooltip="Undo"
+          />
 
           <MenuButton 
-            key={"redoButton"} 
+            key="redo"
             icon={Redo} 
             onClick={() => editor.chain().focus().redo().run()} 
             isActive={false} 
             index={14}
-            tooltip="Redo"/>
+            tooltip="Redo"
+          />
         
-          <MenuSeparator />
+          <MenuSeparator key="sep2" />
 
           {getHeadingItems(editor).map(({ icon: Icon, onClick, isActive, tooltip }, index) => (
             <MenuButton 
-              key={`headingButton${index}`} 
+              key={`heading-${index}`}
               icon={Icon} 
               onClick={onClick} 
               isActive={isActive} 
               index={index}
-              tooltip={tooltip}/>
+              tooltip={tooltip}
+            />
           ))}
 
-          <MenuSeparator />
+          <MenuSeparator key="sep3" />
           
           {getListItems(editor).map(({ icon: Icon, onClick, isActive, tooltip }, index) => (
             <MenuButton 
-              key={`listButton${index}`}
+              key={`list-${index}`}
               icon={Icon} 
               onClick={onClick} 
               isActive={isActive} 
               index={index}
-              tooltip={tooltip}/>
+              tooltip={tooltip}
+            />
           ))}
 
           <MenuButton 
-            key={`codeBlockButton`}
+            key="code-block"
             icon={Braces} 
             onClick={() => editor.chain().focus().toggleCodeBlock().run()} 
             isActive={editor.isActive('codeBlock')} 
             index={15}
-            tooltip='Code block'/>
+            tooltip='Code block'
+          />
 
           <MenuButton
-            key={`blockquoteButton`}
+            key="blockquote"
             icon={TextQuote}
             onClick={() => editor.chain().focus().toggleBlockquote().run()}
             isActive={editor.isActive('blockquote')}
@@ -129,40 +89,43 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
             tooltip='Quote' 
           /> 
 
-          <MenuSeparator />
+          <MenuSeparator key="sep4" />
           
           {getFormatItems(editor).map(({ icon: Icon, onClick, isActive, tooltip }, index) => (
             <MenuButton 
-              key={`formatButton${index}`}
+              key={`format-${index}`}
               icon={Icon} 
               onClick={onClick} 
               isActive={isActive} 
               index={index}
-              tooltip={tooltip}/>
+              tooltip={tooltip}
+            />
           ))}
 
-          <MenuSeparator />
+          <MenuSeparator key="sep5" />
 
           <MenuButton
-            key={`lineButton`}
+            key="line"
             icon={Minus} 
             onClick={() => editor.chain().focus().setHorizontalRule().run()} 
             isActive={false} 
             index={17}
-            tooltip='Add line'/>
+            tooltip='Add line'
+          />
 
           <MenuButton
-            key={`hardBreakButton`}
+            key="hard-break"
             icon={CornerDownLeft} 
             onClick={() => editor.chain().focus().setHardBreak().run()} 
             isActive={false} 
             index={18}
-            tooltip='Add hardbreak'/>
+            tooltip='Add hardbreak'
+          />
 
-          <MenuSeparator />
+          <MenuSeparator key="sep6" />
 
           <MenuButton
-            key="styleButton"
+            key="style"
             icon={Palette}
             onClick={() => setIsStyleDialogOpen(true)}
             isActive={false}
