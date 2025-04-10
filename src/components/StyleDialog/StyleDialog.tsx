@@ -73,7 +73,7 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-md rounded-lg bg-white shadow-xl">
+        <DialogPanel className="w-full max-w-md rounded-lg bg-white shadow-xl max-h-[90vh] flex flex-col">
           <div className="flex items-center justify-between p-4">
             <DialogTitle className="text-lg font-medium text-gray-900">
               Стиль текста
@@ -87,11 +87,8 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
             </button>
           </div>
 
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 overflow-y-auto flex-1">
             <div className="space-y-2">
-              <label htmlFor="styleName" className="block text-sm font-medium text-gray-700">
-                Название стиля
-              </label>
               <input
                 type="text"
                 id="styleName"
@@ -105,14 +102,11 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="styleContent" className="block text-sm font-medium text-gray-700">
-                Стиль
-              </label>
               <textarea
                 id="styleContent"
                 value={styleContent}
                 onChange={(e) => setStyleContent(e.target.value)}
-                placeholder="Введите стиль..."
+                placeholder="Введите свой текст..."
                 rows={4}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
                          placeholder-gray-400 focus:border-violet-500 focus:outline-none

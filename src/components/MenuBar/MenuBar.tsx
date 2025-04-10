@@ -1,11 +1,12 @@
 import { Editor } from '@tiptap/react'
-import { Braces, CornerDownLeft, Minus, Redo, TextQuote, Undo, Palette } from 'lucide-react'
+import { Braces, CornerDownLeft, Minus, Redo, TextQuote, Undo, Palette, UserCircle2 } from 'lucide-react'
 import { useState } from 'react'
 import MenuButton from '../MenuButton'
 import MenuSeparator from '../MenuSeparator'
 import { getFormatItems, getHeadingItems, getListItems } from '../Editor/MenuButtonLists'
 import StyleDialog from '../StyleDialog/StyleDialog'
 import AiCommands from '../AI/AiCommands'
+import ProfileDialog from '../ProfileDialog/ProfileDialog'
 
 interface MenuBarProps {
   editor: Editor | null
@@ -13,6 +14,7 @@ interface MenuBarProps {
 
 const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
   const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false)
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
 
   if (!editor) {
     return null
@@ -132,6 +134,15 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
             index={19}
             tooltip="Стили текста"
           />
+
+          <MenuButton
+            key="profile"
+            icon={UserCircle2}
+            onClick={() => setIsProfileDialogOpen(true)}
+            isActive={false}
+            index={22}
+            tooltip="Профиль"
+          />
         </div>
       </div>
 
@@ -139,6 +150,11 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
         isOpen={isStyleDialogOpen}
         onClose={() => setIsStyleDialogOpen(false)}
         onApply={() => {}}
+      />
+
+      <ProfileDialog
+        isOpen={isProfileDialogOpen}
+        onClose={() => setIsProfileDialogOpen(false)}
       />
     </>
   )
