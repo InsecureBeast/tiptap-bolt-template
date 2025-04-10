@@ -1,8 +1,9 @@
 import { Editor } from '@tiptap/react'
-import { streamText } from './ai.service'
+import { streamResponseText, streamText } from './ai.service'
 import { getPrompt } from '../prompts/generator.prompt'
 import { prompt as checkErrorsPrompt } from '../prompts/check-errors.prompt'
-import { SavedStyle } from '../components/StyleDialog/StyleDialog'
+import { VectorStorageService } from './vector-storage.service'
+import { StyleService } from './style.service'
 
 interface AiCommandCallbacks {
   onStart?: () => void
@@ -14,24 +15,22 @@ export class AiCommandsService {
   static async generateText(editor: Editor, callbacks: AiCommandCallbacks) {
     try {
       callbacks.onStart?.()
-
-      const savedStyles = localStorage.getItem('savedStyles')
+      
       let tov = undefined;
-      if (savedStyles) {
-        const styles = JSON.parse(savedStyles) as SavedStyle[]
-        if (styles.length > 0) {
-          const lastStyle = styles[styles.length - 1];
-          tov = lastStyle.tov;
-        }
+      const defaultStyle = StyleService.getDefaultStyle();
+      if (defaultStyle) {
+        tov = defaultStyle.tov;
       }
+      const storeId = VectorStorageService.getCurrentVectorStoreId();
 
       editor.commands.setContent("");
 
-      await streamText({
+      await streamResponseText({
         prompt: "Напиши текст для поста в телеграме",
-        systemPrompt: getPrompt(tov || "", "", "", "", ""),
+        systemPrompt: getPrompt(tov || "", storeId || "", "", "", ""),
         editor,
         selection: editor.state.selection,
+        storeId: storeId,
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError

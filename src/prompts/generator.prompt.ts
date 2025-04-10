@@ -1,7 +1,7 @@
 export function getPrompt(tov: string, vector_store_id: string, ta: string, min: string, max: string): string {
   ta ||= "Any";
-  min ||= "10";
-  max ||= "500";
+  min ||= "100";
+  max ||= "1000";
   tov ||= "";
   vector_store_id || "";
 
