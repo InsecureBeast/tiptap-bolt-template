@@ -12,7 +12,7 @@ interface AiCommandCallbacks {
 }
 
 export class AiCommandsService {
-  static async generateText(editor: Editor, callbacks: AiCommandCallbacks) {
+  static async generateText(editor: Editor, callbacks: AiCommandCallbacks, overrideAll: boolean = true) {
     try {
       callbacks.onStart?.()
       
@@ -22,8 +22,9 @@ export class AiCommandsService {
         tov = defaultStyle.tov;
       }
       const storeId = VectorStorageService.getCurrentVectorStoreId();
-
-      editor.commands.setContent("");
+      
+      if (overrideAll)
+        editor.commands.setContent("");
 
       await streamResponseText({
         prompt: "Напиши текст для поста в телеграме",

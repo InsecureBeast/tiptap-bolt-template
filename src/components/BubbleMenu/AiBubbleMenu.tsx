@@ -1,8 +1,6 @@
 import { Editor } from '@tiptap/react'
 import { 
   Sparkles, 
-  MessageSquare,
-  Languages,
   Check
 } from 'lucide-react'
 import { useState } from 'react'
@@ -14,10 +12,8 @@ interface AiMenuProps {
 }
 
 const aiItems: IDropdownItem[] = [
-  { id: 1, title: 'Improve', icon: Sparkles },
-  { id: 2, title: 'Summarize', icon: MessageSquare },
-  { id: 3, title: 'Translate', icon: Languages },
-  { id: 4, title: 'Проверить правописание', icon: Check },
+  { id: 1, title: 'Переписать', icon: Sparkles },
+  { id: 2, title: 'Проверить правописание', icon: Check },
 ]
 
 export default function AiBubbleMenu({ editor }: AiMenuProps) {
@@ -31,15 +27,13 @@ export default function AiBubbleMenu({ editor }: AiMenuProps) {
       
       switch (item.id) {
         case 1:
-          // Improve logic
+          await AiCommandsService.generateText(editor, {
+            onStart: () => setIsLoading(true),
+            onFinish: () => setIsLoading(false),
+            onError: () => setIsLoading(false)
+          }, false);
           break
         case 2:
-          // Summarize logic
-          break
-        case 3:
-          // Translate logic
-          break
-        case 4:
           await AiCommandsService.checkSpelling(editor, {
             onStart: () => setIsLoading(true),
             onFinish: () => setIsLoading(false),

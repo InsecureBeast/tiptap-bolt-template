@@ -141,7 +141,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
             onClick={() => setIsProfileDialogOpen(true)}
             isActive={false}
             index={22}
-            tooltip="Профиль"
+            tooltip="Профили"
           />
         </div>
       </div>

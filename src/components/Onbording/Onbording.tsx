@@ -1,3 +1,4 @@
+import { Target } from 'lucide-react';
 import { useState } from 'react';
 import Joyride, { CallBackProps, STATUS } from 'react-joyride';
 
@@ -12,10 +13,17 @@ const steps = [
     content: 'Добавьте текст, оформите списки, заголовки или ссылки.',
   },
   {
+    target: '[data-tooltip="Проверить правописание"]',
+    content: 'Нажмите, чтобы проверить правописание всего текста.',
+  },
+  {
     target: '[data-tooltip="Стили текста"]',
-    content: 'Нажмите, чтобы настроить стиль текста и сохранить его для дальнейшего использования.',
+    content: 'Нажмите, чтобы настроить стили текста и сохранить их для дальнейшего использования.',
+  },
+  {
+    target: '[data-tooltip="Профили"]',
+    content: 'Нажмите, чтобы настроить настроить профили и сохранить их для дальнейшего использования.',
   }
-  
 ];
 
 export default function Onboarding() {

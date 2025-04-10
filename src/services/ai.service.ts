@@ -40,11 +40,8 @@ export async function streamText({
       stream: true,
     })
 
-    let accumulatedText = ''
-    
     for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || ''
-      accumulatedText += content
+      const content = chunk.choices[0]?.delta?.content || '';
 
       if (selection) {
       editor.chain()
@@ -110,12 +107,8 @@ export async function streamResponseText({
       stream: true
     })
 
-    let accumulatedText = ''
-    
     for await (const chunk of stream) {
-      const content = chunk || ''
-      accumulatedText += content
-
+      const content = 'delta' in chunk ? chunk.delta : '';
       if (selection) {
       editor.chain()
         .focus()
