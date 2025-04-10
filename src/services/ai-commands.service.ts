@@ -13,6 +13,7 @@ interface AiCommandCallbacks {
 }
 
 export class AiCommandsService {
+
   static async generateText(editor: Editor, callbacks: AiCommandCallbacks) {
     try {
       let tov = undefined;
@@ -83,6 +84,36 @@ export class AiCommandsService {
       });
     } catch (error) {
       console.error('Error checking text:', error);
+      callbacks.onError?.()
+    }
+  }
+
+  static async addText(editor: Editor, callbacks: AiCommandCallbacks): Promise<void> {
+    try {
+      let tov = undefined;
+      const defaultStyle = StyleService.getDefaultStyle();
+      if (defaultStyle) {
+        tov = defaultStyle.tov;
+      }
+      const storeId = VectorStorageService.getCurrentVectorStoreId();
+      
+      await streamResponseText({
+        prompt: "Напиши статью для vc",
+        systemPrompt: getPrompt(tov || "", storeId || "", "500", "2000", ""),
+        editor,
+        selection: editor.state.selection,
+        storeId: storeId,
+        onStart: callbacks.onStart,
+        onFinish: callbacks.onFinish,
+        onError: callbacks.onError,
+        onStartStreming: () => { 
+          const { empty } = editor.state.selection;
+          if (empty)
+            editor.commands.setContent("");
+        },
+      });
+    } catch (error) {
+      console.error('Error generating text:', error);
       callbacks.onError?.()
     }
   }

@@ -52,7 +52,7 @@ export async function streamText({
       }
 
       const chunkContent = chunk.choices[0]?.delta?.content || '';
-      processor.streamInsertHtmlChunk(chunkContent);
+      processor.streamInsertHtmlChunk(chunkContent, selection?.from, selection?.to);
 
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))
@@ -115,17 +115,10 @@ export async function streamResponseText({
       }
 
       const content = 'delta' in chunk ? chunk.delta : '';
-      if (selection) {
-        editor.chain()
-          .focus()
-          .insertContent(content, { updateSelection: true })
+      editor.chain()
+        .focus()
+        .insertContent(content, { updateSelection: true })
           .run()
-      } else {
-        editor.chain()
-          .focus()
-          .insertContent(content, { updateSelection: true })
-          .run()
-        }
 
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))

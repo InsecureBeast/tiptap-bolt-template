@@ -2,14 +2,20 @@ import { Editor } from '@tiptap/react';
 import { DOMParser as ProseMirrorDOMParser } from 'prosemirror-model';
 
 export class HtmlStreamProcessor {
-  private htmlBuffer: string = '';
+  private _htmlBuffer: string = '';
+  private _isEmpty: boolean = false;
 
-  constructor(private editor: Editor) {}
+  constructor(private editor: Editor) {
+    this._isEmpty = this.editor.state.selection.empty;
+  }
 
   /**
-   * Updates the editor content from the buffer.
+   * Updates the editor content from the buffer within a specified range.
+   * @param html The HTML content to insert.
+   * @param from The starting position in the document.
+   * @param to The ending position in the document.
    */
-  private updateEditorContent(html: string): void {
+  private updateEditorContent(html: string, from: number): void {
     // Clean the received HTML from unnecessary markers (e.g., markdown blocks with ```html)
     html = html.replace("```html", "").replace("```", "");
 
@@ -20,25 +26,34 @@ export class HtmlStreamProcessor {
       .fromSchema(this.editor.schema)
       .parseSlice(doc.body);
 
+    const to = this._isEmpty 
+      ? this.editor.view.state.doc.content.size 
+      : from + this._htmlBuffer.length;
+    
     const transaction = this.editor.view.state.tr
-      .replaceRange(0, this.editor.view.state.doc.content.size, slice);
+      .replaceRange(from, to, slice);
 
     this.editor.view.dispatch(transaction);
   }
 
   /**
-   * Processes incoming chunks of HTML.
-   * @param htmlChunk New chunk of HTML
-   * @param isLast Indicates whether this chunk is the last one (i.e., the stream is complete)
+   * Inserts an HTML chunk into the editor's content stream. The method appends the provided
+   * HTML chunk to an internal buffer and updates the editor content when the stream is complete
+   * or the buffer contains valid HTML.
+   *
+   * @param htmlChunk - The HTML string chunk to be inserted into the editor.
+   * @param from - The starting position in the editor's document where the content should be replaced. Defaults to 0.
+   * @param to - The ending position in the editor's document where the content should be replaced. Defaults to the document's size.
+   * @param isLast - A boolean flag indicating whether this is the last chunk in the stream. If true, the editor content will be updated regardless of the buffer's state.
    */
-  public streamInsertHtmlChunk(htmlChunk: string, isLast: boolean = false): void {
+  public streamInsertHtmlChunk(htmlChunk: string, from: number = 0, isLast: boolean = false): void {
     // Add the new chunk to the buffer
-    this.htmlBuffer += htmlChunk;
+    this._htmlBuffer += htmlChunk;
 
     // Example simple check: if the stream is complete, or the buffer ends with a closing body tag,
     // update the editor content. In a real case, you can use a more reliable check for HTML validity.
-    if (isLast || this.htmlBuffer.trim().endsWith('</body>') || this.isValidHtml(this.htmlBuffer)) {
-      this.updateEditorContent(this.htmlBuffer);
+    if (isLast || this._htmlBuffer.trim().endsWith('</body>') || this.isValidHtml(this._htmlBuffer)) {
+      this.updateEditorContent(this._htmlBuffer, from);
       // Optionally reset the buffer or leave it for subsequent updates
       // this.htmlBuffer = '';
     }
@@ -56,8 +71,3 @@ export class HtmlStreamProcessor {
     return !parsedDoc.querySelector('parsererror');
   }
 }
-
-// Example usage:
-// const processor = new HtmlStreamProcessor(editor);
-// processor.streamInsertHtmlChunk(receivedChunk, false);
-// processor.streamInsertHtmlChunk(lastChunk, true);

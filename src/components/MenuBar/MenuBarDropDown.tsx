@@ -92,7 +92,7 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
             <span className="mr-2">
               {isLoading ? <LoadingSpinner /> : <Icon size={20} />}
             </span>
-            {title && <span className="text-sm text-gray-700">{title}</span>}
+            {title && <span className="text-sm text-gray-700 text-nowrap">{title}</span>}
           </>
         )}
 
