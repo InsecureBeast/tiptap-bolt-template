@@ -1,5 +1,4 @@
-import { Target } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Joyride, { CallBackProps, STATUS } from 'react-joyride';
 
 const steps = [
@@ -27,11 +26,22 @@ const steps = [
 ];
 
 export default function Onboarding() {
-  const [run, setRun] = useState(true);
+  const [run, setRun] = useState(false);
+
+  useEffect(() => {
+    // Проверяем, был ли уже показан онбординг
+    const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+    
+    if (!hasSeenOnboarding) {
+      setRun(true);
+    }
+  }, []);
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status } = data;
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+      // Отмечаем, что онбординг был показан
+      localStorage.setItem('hasSeenOnboarding', 'true');
       setRun(false);
     }
   };
