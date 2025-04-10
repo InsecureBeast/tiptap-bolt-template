@@ -1,7 +1,8 @@
 import { Editor } from '@tiptap/react'
 import { 
   Sparkles, 
-  Check
+  Check,
+  AlignJustify
 } from 'lucide-react'
 import { useState } from 'react'
 import MenuBarDropDown, { IDropdownItem } from '../MenuBar/MenuBarDropDown'
@@ -14,6 +15,7 @@ interface AiMenuProps {
 const aiItems: IDropdownItem[] = [
   { id: 1, title: 'Переписать', icon: Sparkles },
   { id: 2, title: 'Проверить правописание', icon: Check },
+  { id: 3, title: 'Структурировать текст', icon: AlignJustify },
 ]
 
 export default function AiBubbleMenu({ editor }: AiMenuProps) {
@@ -31,10 +33,17 @@ export default function AiBubbleMenu({ editor }: AiMenuProps) {
             onStart: () => setIsLoading(true),
             onFinish: () => setIsLoading(false),
             onError: () => setIsLoading(false)
-          }, false);
+          });
           break
         case 2:
           await AiCommandsService.checkSpelling(editor, {
+            onStart: () => setIsLoading(true),
+            onFinish: () => setIsLoading(false),
+            onError: () => setIsLoading(false)
+          });
+          break
+        case 3:
+          await AiCommandsService.structureTheText(editor, {
             onStart: () => setIsLoading(true),
             onFinish: () => setIsLoading(false),
             onError: () => setIsLoading(false)

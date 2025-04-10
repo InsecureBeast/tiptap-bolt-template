@@ -1,6 +1,7 @@
 import { Tool } from 'openai/resources/responses/responses.mjs'
 import { openai } from '../config/openai'
 import { Editor } from '@tiptap/react'
+import { HtmlStreamProcessor } from '../utils/HtmlStreamProcessor'
 
 interface StreamTextOptions {
   prompt: string
@@ -11,6 +12,7 @@ interface StreamTextOptions {
   onStart?: () => void
   onFinish?: () => void
   onError?: (error: Error) => void
+  onStartStreming?: () => void;
 }
 
 export async function streamText({
@@ -20,10 +22,11 @@ export async function streamText({
   selection,
   onStart,
   onFinish,
-  onError
+  onError,
+  onStartStreming
 }: StreamTextOptions) {
   try {
-    onStart?.()
+    onStart?.();
 
     const stream = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -40,20 +43,16 @@ export async function streamText({
       stream: true,
     })
 
+    const processor = new HtmlStreamProcessor(editor);
+    let isStartStreming = false;
     for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || '';
-
-      if (selection) {
-      editor.chain()
-        .focus()
-        .insertContent(content, { updateSelection: true })
-        .run()
-      } else {
-      editor.chain()
-        .focus()
-        .insertContent(content, { updateSelection: true })
-        .run()
+      if (!isStartStreming) {
+        onStartStreming?.();
+        isStartStreming = true;
       }
+
+      const chunkContent = chunk.choices[0]?.delta?.content || '';
+      processor.streamInsertHtmlChunk(chunkContent);
 
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))
@@ -83,7 +82,8 @@ export async function streamResponseText({
   storeId,
   onStart,
   onFinish,
-  onError
+  onError,
+  onStartStreming
 }: StreamTextOptions) {
   try {
     onStart?.()
@@ -107,19 +107,25 @@ export async function streamResponseText({
       stream: true
     })
 
+    let isStartStreming = false;
     for await (const chunk of stream) {
+      if (!isStartStreming) {
+        onStartStreming?.();
+        isStartStreming = true;
+      }
+
       const content = 'delta' in chunk ? chunk.delta : '';
       if (selection) {
-      editor.chain()
-        .focus()
-        .insertContent(content, { updateSelection: true })
-        .run()
+        editor.chain()
+          .focus()
+          .insertContent(content, { updateSelection: true })
+          .run()
       } else {
-      editor.chain()
-        .focus()
-        .insertContent(content, { updateSelection: true })
-        .run()
-      }
+        editor.chain()
+          .focus()
+          .insertContent(content, { updateSelection: true })
+          .run()
+        }
 
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))

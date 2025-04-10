@@ -1,5 +1,5 @@
 import { Editor } from '@tiptap/react'
-import { Check, FileText } from 'lucide-react'
+import { AlignJustify, Check, FileText } from 'lucide-react'
 import { useState } from 'react'
 import MenuButton from '../MenuButton'
 import { AiCommandsService } from '../../services/ai-commands.service'
@@ -11,9 +11,11 @@ interface AiCommandsProps {
 export default function AiCommands({ editor }: AiCommandsProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isChecking, setIsChecking] = useState(false)
+  const [isStructuring, setIsStructuring] = useState(false)
 
   const handleGenerateText = async () => {
-    if (isGenerating) return;
+    if (isGenerating) 
+      return;
     
     await AiCommandsService.generateText(editor, {
       onStart: () => setIsGenerating(true),
@@ -23,12 +25,24 @@ export default function AiCommands({ editor }: AiCommandsProps) {
   }
 
   const handleSpellCheck = async () => {
-    if (isChecking) return;
+    if (isChecking) 
+      return;
     
     await AiCommandsService.checkSpelling(editor, {
       onStart: () => setIsChecking(true),
       onFinish: () => setIsChecking(false),
       onError: () => setIsChecking(false)
+    });
+  }
+
+  const handleStructureText = async () => {
+    if (isStructuring) 
+      return;
+    
+    await AiCommandsService.structureTheText(editor, {
+      onStart: () => setIsStructuring(true),
+      onFinish: () => setIsStructuring(false),
+      onError: () => setIsStructuring(false)
     });
   }
 
@@ -53,6 +67,16 @@ export default function AiCommands({ editor }: AiCommandsProps) {
         isLoading={isChecking}
         index={21}
         tooltip="Проверить правописание"
+      />
+
+      <MenuButton
+        key="structure-text"
+        icon={AlignJustify}
+        onClick={handleStructureText}
+        isActive={isStructuring}
+        isLoading={isStructuring}
+        index={22}
+        tooltip="Структурировать текст"
       />
     </div>
   )
