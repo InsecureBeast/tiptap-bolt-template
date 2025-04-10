@@ -1,32 +1,124 @@
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
-import { Link2, Upload, X } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { Link2, Upload, X, Star, Trash2 } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
 import LoadingSpinner from '../Spiner'
+import { VectorStorageService, ProfileData } from '../../services/vector-storage.service'
 
-interface ProfileDialogProps {
-  isOpen: boolean
-  onClose: () => void
-}
-
-export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
+export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [profileName, setProfileName] = useState('')
   const [profileContent, setProfileContent] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
+  const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [savedProfiles, setSavedProfiles] = useState<ProfileData[]>([])
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
-  const hasExistingProfile = false // TODO: implement profile check
+  // Check if there are existing profiles
+  const hasExistingProfile = savedProfiles.length > 0
+
+  // Load profiles from localStorage when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      const profiles = VectorStorageService.getSavedProfiles()
+      setSavedProfiles(profiles)
+
+      // If there are profiles, load the most recent or default one
+      const defaultProfile = VectorStorageService.getDefaultProfile()
+      if (defaultProfile) {
+        setProfileName(defaultProfile.name)
+        setProfileContent(defaultProfile.content)
+      } else {
+        // If no profiles, set default values
+        setDefaultProfile()
+      }
+    }
+  }, [isOpen])
+
+  // Set default profile if no profiles exist
+  const setDefaultProfile = () => {
+    const defaultProfile = {
+      name: 'Мой первый профиль',
+      content: 'Введите описание вашего профиля здесь...'
+    }
+    
+    setProfileName(defaultProfile.name)
+    setProfileContent(defaultProfile.content)
+  }
+
+  const handleSetDefaultProfile = (profileName: string) => {
+    VectorStorageService.setDefaultProfile(profileName)
+    // Refresh profiles to update default status
+    setSavedProfiles(VectorStorageService.getSavedProfiles())
+  }
+
+  const handleDeleteProfile = (profileName: string) => {
+    // If only one profile exists, prevent deletion
+    if (savedProfiles.length <= 1) {
+      setError('Невозможно удалить последний профиль')
+      return
+    }
+
+    // If profile is default, confirm deletion
+    const profileToDelete = savedProfiles.find(p => p.name === profileName)
+    if (profileToDelete?.isDefault) {
+      setConfirmDelete(profileName)
+      return
+    }
+
+    // Perform deletion
+    VectorStorageService.deleteProfile(profileName)
+    
+    // Ensure a default profile exists
+    VectorStorageService.ensureDefaultProfile()
+
+    // Refresh profiles
+    const updatedProfiles = VectorStorageService.getSavedProfiles()
+    setSavedProfiles(updatedProfiles)
+
+    // Load the new default profile
+    const newDefaultProfile = VectorStorageService.getDefaultProfile()
+    if (newDefaultProfile) {
+      setProfileName(newDefaultProfile.name)
+      setProfileContent(newDefaultProfile.content)
+    }
+  }
+
+  const handleConfirmDelete = () => {
+    if (confirmDelete) {
+      VectorStorageService.deleteProfile(confirmDelete)
+      
+      // Ensure a default profile exists
+      VectorStorageService.ensureDefaultProfile()
+
+      // Refresh profiles
+      const updatedProfiles = VectorStorageService.getSavedProfiles()
+      setSavedProfiles(updatedProfiles)
+
+      // Load the new default profile
+      const newDefaultProfile = VectorStorageService.getDefaultProfile()
+      if (newDefaultProfile) {
+        setProfileName(newDefaultProfile.name)
+        setProfileContent(newDefaultProfile.content)
+      }
+
+      // Reset confirm delete state
+      setConfirmDelete(null)
+    }
+  }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     const droppedFiles = Array.from(e.dataTransfer.files)
     setFiles(prev => [...prev, ...droppedFiles])
+    setError(null)
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files)
       setFiles(prev => [...prev, ...selectedFiles])
+      setError(null)
     }
   }
 
@@ -48,15 +140,54 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
   }
 
   const handleApply = async () => {
-    if (!profileName || !profileContent) return
+    // Validate inputs
+    if (!profileName) {
+      setError('Пожалуйста, введите название профиля')
+      return
+    }
+
+    // Check if there are files or profile content
+    if (files.length === 0 && !profileContent.trim()) {
+      setError('Добавьте файлы или введите описание профиля')
+      return
+    }
 
     setIsLoading(true)
+    setError(null)
+
     try {
-      // TODO: implement AI call
-      await new Promise(resolve => setTimeout(resolve, 1500)) // Temporary simulation
+      // Create vector store
+      const vectorStoreId = await VectorStorageService.createVectorStore(
+        files, 
+        profileContent
+      )
+
+      if (!vectorStoreId) {
+        throw new Error('Не удалось создать векторное хранилище')
+      }
+
+      // Save profile data
+      VectorStorageService.saveProfileData(
+        profileName, 
+        profileContent, 
+        vectorStoreId
+      )
+
+      // Refresh saved profiles
+      const updatedProfiles = VectorStorageService.getSavedProfiles()
+      setSavedProfiles(updatedProfiles)
+
+      // Reset form and close dialog
+      setProfileName('')
+      setProfileContent('')
+      setFiles([])
       onClose()
     } catch (error) {
       console.error('Error processing profile:', error)
+      setError(error instanceof Error 
+        ? error.message 
+        : 'Произошла ошибка при обработке профиля'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -81,13 +212,24 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
             </button>
           </div>
 
+          {error && (
+            <div className="px-4 pb-2">
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            </div>
+          )}
+
           <div className="p-4 space-y-4 overflow-y-auto flex-1">
             {/* Profile Name Input */}
             <div className="space-y-2">
               <input
                 type="text"
                 value={profileName}
-                onChange={(e) => setProfileName(e.target.value)}
+                onChange={(e) => {
+                  setProfileName(e.target.value)
+                  setError(null)
+                }}
                 placeholder="Название профиля"
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm 
                          placeholder-gray-400 focus:border-violet-500 focus:outline-none
@@ -99,14 +241,62 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
             <div className="space-y-2">
               <textarea
                 value={profileContent}
-                onChange={(e) => setProfileContent(e.target.value)}
-                placeholder="Введите свой текст"
+                onChange={(e) => {
+                  setProfileContent(e.target.value)
+                  setError(null)
+                }}
+                placeholder="Введите описание профиля"
                 rows={4}
                 className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
                          placeholder-gray-400 focus:border-violet-500 focus:outline-none
                          focus:ring-1 focus:ring-violet-500"
               />
             </div>
+
+            {/* Existing Profiles Section */}
+            {savedProfiles.length > 0 && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Существующие профили:
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {savedProfiles.map((profile, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center gap-2 bg-gray-100 hover:bg-violet-100 
+                                 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors"
+                    >
+                      <button
+                        onClick={() => {
+                          setProfileName(profile.name)
+                          setProfileContent(profile.content)
+                        }}
+                        className="flex-grow text-left"
+                      >
+                        {profile.name}
+                      </button>
+                      <button
+                        onClick={() => handleSetDefaultProfile(profile.name)}
+                        className={`
+                          ${profile.isDefault ? 'text-yellow-500' : 'text-gray-400'}
+                          hover:text-yellow-600 transition-colors
+                        `}
+                        title="Установить профиль по умолчанию"
+                      >
+                        <Star size={16} fill={profile.isDefault ? 'currentColor' : 'none'} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProfile(profile.name)}
+                        className="text-gray-400 hover:text-red-600 transition-colors"
+                        title="Удалить профиль"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* File Upload Area */}
             <div
@@ -175,7 +365,7 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
           <div className="p-4">
             <button
               onClick={handleApply}
-              disabled={!profileName || !profileContent || isLoading}
+              disabled={!profileName || (!files.length && !profileContent.trim()) || isLoading}
               className="w-full rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold
                        text-white shadow-sm hover:bg-violet-600 focus:outline-none
                        focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
@@ -192,6 +382,33 @@ export default function ProfileDialog({ isOpen, onClose }: ProfileDialogProps) {
               )}
             </button>
           </div>
+
+          {/* Confirm Delete Modal */}
+          {confirmDelete && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+                <h2 className="text-lg font-semibold mb-4">Удаление профиля по умолчанию</h2>
+                <p className="mb-4">
+                  Вы собираетесь удалить профиль по умолчанию. Это приведет к установке 
+                  другого профиля по умолчанию. Продолжить?
+                </p>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    onClick={() => setConfirmDelete(null)}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md"
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    onClick={handleConfirmDelete}
+                    className="px-4 py-2 bg-red-500 text-white rounded-md"
+                  >
+                    Удалить
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </DialogPanel>
       </div>
     </Dialog>
