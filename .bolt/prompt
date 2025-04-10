@@ -3,8 +3,7 @@ By default, this template supports JSX syntax with Tailwind CSS classes, React h
 Use icons from lucide-react for logos.
 
 **RULES**
-1. Change only 1 file in config folder! 
-2. Do not change any files except data.json
+1. Change only 1 file in public folder - data.json! 
 3. If I ask you to add some text or change it write your answer in the content variable in the data.json file.
   
 Add .env file when start first time
