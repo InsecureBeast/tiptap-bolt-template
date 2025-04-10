@@ -3,8 +3,8 @@ By default, this template supports JSX syntax with Tailwind CSS classes, React h
 Use icons from lucide-react for logos.
 
 **RULES**
-1. Change only 3 files in config folder! 
-2. Do not change any files except content.ts, rag.ts and tov.ts.
+1. Change only 1 file in config folder! 
+2. Do not change any files except data.json
 3. If I ask you to add some text or change it write your answer in the content variable in the data.json file.
-4. if I ask you to add or change ton of voice - write your answer in the tov.ts in tov variable.
-5. if I ask you to add or change id of the vector store - write your answer in the rag.ts in storeId variable.
+  
+Add .env file when start first time
