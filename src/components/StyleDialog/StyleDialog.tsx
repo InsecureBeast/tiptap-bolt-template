@@ -44,8 +44,8 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
   // Set default style if no styles exist
   const setDefaultStyle = () => {
     const defaultStyle = {
-      name: 'Мой первый стиль',
-      content: 'Введите текст для определения стиля...'
+      name: '',
+      content: ''
     }
     
     setStyleName(defaultStyle.name)
@@ -59,12 +59,6 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
   }
 
   const handleDeleteStyle = (styleName: string) => {
-    // If only one style exists, prevent deletion
-    if (savedStyles.length <= 1) {
-      setError('Невозможно удалить последний стиль')
-      return
-    }
-
     // If style is default, confirm deletion
     const styleToDelete = savedStyles.find(s => s.name === styleName)
     if (styleToDelete?.isDefault) {

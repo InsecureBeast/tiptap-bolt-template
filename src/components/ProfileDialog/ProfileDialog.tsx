@@ -38,8 +38,8 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
   // Set default profile if no profiles exist
   const setDefaultProfile = () => {
     const defaultProfile = {
-      name: 'Мой первый профиль',
-      content: 'Введите описание вашего профиля здесь...'
+      name: '',
+      content: ''
     }
     
     setProfileName(defaultProfile.name)
@@ -53,12 +53,6 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
   }
 
   const handleDeleteProfile = (profileName: string) => {
-    // If only one profile exists, prevent deletion
-    if (savedProfiles.length <= 1) {
-      setError('Невозможно удалить последний профиль')
-      return
-    }
-
     // If profile is default, confirm deletion
     const profileToDelete = savedProfiles.find(p => p.name === profileName)
     if (profileToDelete?.isDefault) {
