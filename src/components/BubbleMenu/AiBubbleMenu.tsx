@@ -2,7 +2,8 @@ import { Editor } from '@tiptap/react'
 import { 
   Sparkles, 
   Check,
-  AlignJustify
+  AlignJustify,
+  ListPlus
 } from 'lucide-react'
 import { useState } from 'react'
 import MenuBarDropDown, { IDropdownItem } from '../MenuBar/MenuBarDropDown'
@@ -14,7 +15,7 @@ interface AiMenuProps {
 
 const aiItems: IDropdownItem[] = [
   { id: 1, title: 'Переписать', icon: Sparkles },
-  { id: 2, title: 'Дополнить', icon: AlignJustify },
+  { id: 2, title: 'Дополнить', icon: ListPlus },
   { id: 3, title: 'Проверить на ошибки', icon: Check },
   { id: 4, title: 'Структурировать текст', icon: AlignJustify },
 ]

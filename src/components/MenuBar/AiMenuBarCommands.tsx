@@ -8,7 +8,7 @@ interface AiCommandsProps {
   editor: Editor
 }
 
-export default function AiCommands({ editor }: AiCommandsProps) {
+export default function AiMenuBarCommands({ editor }: AiCommandsProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [isChecking, setIsChecking] = useState(false)
   const [isStructuring, setIsStructuring] = useState(false)

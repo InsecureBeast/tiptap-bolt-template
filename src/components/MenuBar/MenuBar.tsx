@@ -5,7 +5,7 @@ import MenuButton from '../MenuButton'
 import MenuSeparator from '../MenuSeparator'
 import { getFormatItems, getHeadingItems, getListItems } from '../Editor/MenuButtonLists'
 import StyleDialog from '../StyleDialog/StyleDialog'
-import AiCommands from '../AI/AiCommands'
+import AiMenuBarCommands from './AiMenuBarCommands'
 import ProfileDialog from '../ProfileDialog/ProfileDialog'
 
 interface MenuBarProps {
@@ -25,7 +25,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       <div className="flex items-center justify-start bg-gray-100 p-2 border-b 
                     border-gray-300 shadow-sm sticky top-0 z-10">
         <div className="flex flex-wrap flex-row space-x-1" id="editorToolbar">
-          <AiCommands editor={editor} />
+          <AiMenuBarCommands editor={editor} />
 
           <MenuSeparator key="sep1" />
 

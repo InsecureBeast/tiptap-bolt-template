@@ -3,8 +3,8 @@ import { streamResponseText, streamText } from './ai.service'
 import { getPrompt } from '../prompts/generator.prompt'
 import { prompt as checkErrorsPrompt } from '../prompts/check-errors.prompt'
 import { prompt as structureTextPromp } from '../prompts/structure-text,prompt'
-import { VectorStorageService } from './vector-storage.service'
-import { StyleService } from './style.service'
+import { getPrompt as getAddTextPrompt } from '../prompts/add-text.prompt'
+import { getProfileAndToV, getSelectionText } from './ai-commands.utils'
 
 interface AiCommandCallbacks {
   onStart?: () => void
@@ -16,19 +16,14 @@ export class AiCommandsService {
 
   static async generateText(editor: Editor, callbacks: AiCommandCallbacks) {
     try {
-      let tov = undefined;
-      const defaultStyle = StyleService.getDefaultStyle();
-      if (defaultStyle) {
-        tov = defaultStyle.tov;
-      }
-      const storeId = VectorStorageService.getCurrentVectorStoreId();
+      const ptov = getProfileAndToV();
       
       await streamResponseText({
         prompt: "Напиши статью для vc",
-        systemPrompt: getPrompt(tov || "", storeId || "", "500", "2000", ""),
+        systemPrompt: getPrompt(ptov.tov, ptov.storeId, "500", "2000", ""),
         editor,
         selection: editor.state.selection,
-        storeId: storeId,
+        storeId: ptov.storeId,
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
@@ -46,14 +41,13 @@ export class AiCommandsService {
 
   static async checkSpelling(editor: Editor, callbacks: AiCommandCallbacks) {
     try {
-      const { empty, from, to } = editor.state.selection;
-      const text = empty ? editor.getText() : editor.state.doc.textBetween(from, to);
+      const selectionText = getSelectionText(editor);
 
       await streamText({
-        prompt: text,
+        prompt: selectionText.text,
         systemPrompt: checkErrorsPrompt,
         editor,
-        selection: empty ? undefined : { from, to },
+        selection: selectionText,
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError
@@ -66,19 +60,18 @@ export class AiCommandsService {
 
   static async structureTheText(editor: Editor, callbacks: AiCommandCallbacks) {
     try {
-      const { empty, from, to } = editor.state.selection;
-      const text = empty ? editor.getText() : editor.state.doc.textBetween(from, to);
+      const selectionText = getSelectionText(editor);
 
       await streamText({
-        prompt: text,
+        prompt: selectionText.text,
         systemPrompt: structureTextPromp,
         editor,
-        selection: empty ? undefined : { from, to },
+        selection: selectionText,
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
         onStartStreming: () => { 
-          if (empty)
+          if (selectionText.empty)
             editor.commands.setContent("");
         },
       });
@@ -90,30 +83,25 @@ export class AiCommandsService {
 
   static async addText(editor: Editor, callbacks: AiCommandCallbacks): Promise<void> {
     try {
-      let tov = undefined;
-      const defaultStyle = StyleService.getDefaultStyle();
-      if (defaultStyle) {
-        tov = defaultStyle.tov;
-      }
-      const storeId = VectorStorageService.getCurrentVectorStoreId();
+      const ptov = getProfileAndToV();
+      const selectionText = getSelectionText(editor);
       
       await streamResponseText({
-        prompt: "Напиши статью для vc",
-        systemPrompt: getPrompt(tov || "", storeId || "", "500", "2000", ""),
+        prompt: selectionText.text,
+        systemPrompt: getAddTextPrompt(ptov.tov, null),
         editor,
-        selection: editor.state.selection,
-        storeId: storeId,
+        selection: selectionText,
+        storeId: ptov.storeId,
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
         onStartStreming: () => { 
-          const { empty } = editor.state.selection;
-          if (empty)
+          if (selectionText.empty)
             editor.commands.setContent("");
         },
       });
     } catch (error) {
-      console.error('Error generating text:', error);
+      console.error('Error generating additional text:', error);
       callbacks.onError?.()
     }
   }

@@ -1,4 +1,4 @@
-export function getPrompt(tov: string, vector_store_id: string, ta: string, min: string, max: string): string {
+export function getPrompt(tov: string | undefined, vector_store_id: string | null, ta: string, min: string, max: string): string {
   ta ||= "Any";
   min ||= "100";
   max ||= "1000";
