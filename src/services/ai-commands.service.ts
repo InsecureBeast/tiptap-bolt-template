@@ -5,6 +5,7 @@ import { prompt as checkErrorsPrompt } from '../prompts/check-errors.prompt'
 import { prompt as structureTextPromp } from '../prompts/structure-text,prompt'
 import { getPrompt as getAddTextPrompt } from '../prompts/add-text.prompt'
 import { getProfileAndToV, getSelectionText } from './ai-commands.utils'
+import { systemPrompt as adaptionSystemPrompt, telegramStructurePrompt, vcruStructurePrompt } from '../prompts/content-adaption.prompt'
 
 interface AiCommandCallbacks {
   onStart?: () => void
@@ -102,6 +103,52 @@ export class AiCommandsService {
       });
     } catch (error) {
       console.error('Error generating additional text:', error);
+      callbacks.onError?.()
+    }
+  }
+
+  static async adaptContentVcru(editor: Editor, callbacks: AiCommandCallbacks) {
+    try {
+      const selectionText = getSelectionText(editor);
+
+      await streamText({
+        prompt: `Article Version Rules: ${vcruStructurePrompt}. Input text: ${selectionText.text}`,
+        systemPrompt: adaptionSystemPrompt,
+        editor,
+        selection: selectionText,
+        onStart: callbacks.onStart,
+        onFinish: callbacks.onFinish,
+        onError: callbacks.onError,
+        onStartStreming: () => { 
+          if (selectionText.empty)
+            editor.commands.setContent("");
+        },
+      });
+    } catch (error) {
+      console.error('Error checking text:', error);
+      callbacks.onError?.()
+    }
+  }
+
+  static async adaptContentTelegram(editor: Editor, callbacks: AiCommandCallbacks) {
+    try {
+      const selectionText = getSelectionText(editor);
+
+      await streamText({
+        prompt: `Post Version Rules: ${telegramStructurePrompt}. Input text: ${selectionText.text}`,
+        systemPrompt: adaptionSystemPrompt,
+        editor,
+        selection: selectionText,
+        onStart: callbacks.onStart,
+        onFinish: callbacks.onFinish,
+        onError: callbacks.onError,
+        onStartStreming: () => { 
+          if (selectionText.empty)
+            editor.commands.setContent("");
+        },
+      });
+    } catch (error) {
+      console.error('Error checking text:', error);
       callbacks.onError?.()
     }
   }

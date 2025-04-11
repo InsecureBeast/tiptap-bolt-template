@@ -15,10 +15,11 @@ interface IDropDownProps {
   selectId: any;
   onSelect: (item: IDropdownItem) => void;
   title: string | undefined;
-  isChangeSelected: boolean;
   icon: LucideIcon;
+  isChangeSelected?: boolean;
   isLoading?: boolean;
   hasSubMenu?: boolean;
+  isDisabled?: boolean;
 }
 
 const MenuBarDropDown: React.FC<IDropDownProps> = ({ 
@@ -27,10 +28,11 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
   isActive, 
   selectId, 
   title, 
-  isChangeSelected, 
   icon: Icon,
+  isChangeSelected = true,
   isLoading = false,
-  hasSubMenu = false
+  hasSubMenu = false,
+  isDisabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<number | null>(null);
@@ -84,18 +86,28 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors 
-                  focus:outline-none
-                  ${isActive ? "bg-violet-200 text-white" : "bg-white text-gray-700"}`
-                }
+        disabled={isDisabled}
+        className={`flex items-center  p-2 rounded-md transition-all duration-200 justify-center disabled:opacity-50 disabled:cursor-not-allowed
+                  ${isActive ? "bg-violet-200" : "bg-transparent text-gray-700 hover:bg-gray-200 active:bg-gray-300"}`}
       >
         <span className="mr-2">
-          {isLoading ? <LoadingSpinner /> : <Icon size={20} />}
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : isChangeSelected && selectedItem ? (
+            <selectedItem.icon size={20} />
+          ) : (
+            <Icon size={20} />
+          )}
         </span>
-        {title && <span className="text-sm text-gray-700 text-nowrap">{title}</span>}
+        {isChangeSelected && selectedItem ? (
+          <span className="text-sm text-gray-700 text-nowrap">{selectedItem.title}</span>
+        ) : (
+          title && <span className="text-sm text-gray-700 text-nowrap">{title}</span>
+        )}
         <ChevronDown size={20} className="text-gray-500 ml-2" />
       </button>
-
+      
+      {/* Dropdown */}
       {isOpen && (
         <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg w-64 z-50">
           {items.map((item) => (
