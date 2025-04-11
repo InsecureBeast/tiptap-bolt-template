@@ -15,12 +15,12 @@ interface AiCommandCallbacks {
 
 export class AiCommandsService {
 
-  static async generateText(editor: Editor, callbacks: AiCommandCallbacks) {
+  static async generateText(editor: Editor, callbacks: AiCommandCallbacks, customPrompt?: string) {
     try {
       const ptov = getProfileAndToV();
       
       await streamResponseText({
-        prompt: "Напиши статью для vc",
+        prompt: customPrompt || "Напиши тестовый текст для проверки редактора.",
         systemPrompt: getPrompt(ptov.tov, ptov.storeId, "500", "2000", ""),
         editor,
         selection: editor.state.selection,

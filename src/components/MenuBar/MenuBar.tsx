@@ -9,10 +9,11 @@ import AiMenuBarCommands from './AiMenuBarCommands'
 import ProfileDialog from '../ProfileDialog/ProfileDialog'
 
 interface MenuBarProps {
-  editor: Editor | null
+  editor: Editor | null,
+  onAIQueryToggle: () => void
 }
 
-const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
+const MenuBar: React.FC<MenuBarProps> = ({ editor, onAIQueryToggle }) => {
   const [isStyleDialogOpen, setIsStyleDialogOpen] = useState(false)
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false)
 
@@ -25,7 +26,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ editor }) => {
       <div className="flex items-center justify-start bg-gray-100 p-2 border-b 
                     border-gray-300 shadow-sm sticky top-0 z-10">
         <div className="flex flex-wrap flex-row space-x-1" id="editorToolbar">
-          <AiMenuBarCommands editor={editor} />
+          <AiMenuBarCommands editor={editor} onAIQueryToggle={onAIQueryToggle} />
 
           <MenuSeparator key="sep1" />
 

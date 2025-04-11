@@ -1,30 +1,19 @@
 import { Editor } from '@tiptap/react'
-import { AlignJustify, Asterisk, Brackets, Check, FileText, Send, Sparkles } from 'lucide-react'
+import { AlignJustify, Asterisk, Brackets, Check, Send, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import MenuButton from '../MenuButton'
 import { AiCommandsService } from '../../services/ai-commands.service'
 import MenuBarDropDown, { IDropdownItem } from './MenuBarDropDown'
 
 interface AiCommandsProps {
-  editor: Editor
+  editor: Editor,
+  onAIQueryToggle: () => void
 }
 
-export default function AiMenuBarCommands({ editor }: AiCommandsProps) {
-  const [isGenerating, setIsGenerating] = useState(false)
+export default function AiMenuBarCommands({ editor, onAIQueryToggle }: AiCommandsProps) {
   const [isChecking, setIsChecking] = useState(false)
   const [isStructuring, setIsStructuring] = useState(false)
   const [isAdapting, setIsAdapting] = useState(false)
-
-  const handleGenerateText = async () => {
-    if (isGenerating) 
-      return;
-    
-    await AiCommandsService.generateText(editor, {
-      onStart: () => setIsGenerating(true),
-      onFinish: () => setIsGenerating(false),
-      onError: () => setIsGenerating(false)
-    });
-  }
 
   const handleSpellCheck = async () => {
     if (isChecking) 
@@ -87,14 +76,12 @@ export default function AiMenuBarCommands({ editor }: AiCommandsProps) {
   return (
     <div className="flex items-center gap-1">
       <MenuButton
-        key="generate"
-        icon={FileText}
-        onClick={handleGenerateText}
-        isActive={isGenerating}
-        isLoading={isGenerating}
+        key="ai-query"
+        icon={Sparkles}
+        onClick={onAIQueryToggle}
+        isActive={false}
         index={20}
-        tooltip=""
-        title="Сгенерировать текст"
+        tooltip="AI Запрос"
       />
 
       <MenuButton
