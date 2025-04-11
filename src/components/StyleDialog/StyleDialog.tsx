@@ -19,9 +19,7 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
   const [savedStyles, setSavedStyles] = useState<SavedStyle[]>([])
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-
-  // Check if there are existing styles
-  const hasExistingStyle = savedStyles.length > 0
+  const [selectedStyle, setSelectedStyle] = useState<SavedStyle | null>(null)
 
   // Load styles from localStorage when dialog opens
   useEffect(() => {
@@ -29,28 +27,12 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
       const styles = StyleService.getSavedStyles()
       setSavedStyles(styles)
 
-      // If there are styles, load the most recent or default one
-      const defaultStyle = StyleService.getDefaultStyle()
-      if (defaultStyle) {
-        setStyleName(defaultStyle.name)
-        setStyleContent(defaultStyle.content)
-      } else {
-        // If no styles, set default values
-        setDefaultStyle()
-      }
+      // Always reset to empty fields when dialog opens
+      setStyleName('')
+      setStyleContent('')
+      setSelectedStyle(null)
     }
   }, [isOpen])
-
-  // Set default style if no styles exist
-  const setDefaultStyle = () => {
-    const defaultStyle = {
-      name: '',
-      content: ''
-    }
-    
-    setStyleName(defaultStyle.name)
-    setStyleContent(defaultStyle.content)
-  }
 
   const handleSetDefaultStyle = (styleName: string) => {
     StyleService.setDefaultStyle(styleName)
@@ -76,11 +58,11 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
     const updatedStyles = StyleService.getSavedStyles()
     setSavedStyles(updatedStyles)
 
-    // Load the new default style
-    const newDefaultStyle = StyleService.getDefaultStyle()
-    if (newDefaultStyle) {
-      setStyleName(newDefaultStyle.name)
-      setStyleContent(newDefaultStyle.content)
+    // Reset selection if deleted style was selected
+    if (selectedStyle?.name === styleName) {
+      setSelectedStyle(null)
+      setStyleName('')
+      setStyleContent('')
     }
   }
 
@@ -95,16 +77,26 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
       const updatedStyles = StyleService.getSavedStyles()
       setSavedStyles(updatedStyles)
 
-      // Load the new default style
-      const newDefaultStyle = StyleService.getDefaultStyle()
-      if (newDefaultStyle) {
-        setStyleName(newDefaultStyle.name)
-        setStyleContent(newDefaultStyle.content)
-      }
+      // Reset selection
+      setSelectedStyle(null)
+      setStyleName('')
+      setStyleContent('')
 
       // Reset confirm delete state
       setConfirmDelete(null)
     }
+  }
+
+  const handleStyleSelect = (style: SavedStyle) => {
+    setSelectedStyle(style)
+    setStyleName(style.name)
+    setStyleContent(style.content)
+  }
+
+  const handleResetSelection = () => {
+    setSelectedStyle(null)
+    setStyleName('')
+    setStyleContent('')
   }
 
   const handleApply = async () => {
@@ -120,6 +112,17 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
       return
     }
 
+    // Check for duplicate style name
+    const isDuplicate = savedStyles.some(
+      style => style.name.toLowerCase() === styleName.toLowerCase() && 
+               style !== selectedStyle
+    )
+
+    if (isDuplicate) {
+      setError('Стиль с таким именем уже существует')
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
@@ -129,12 +132,13 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
         prompt: styleContent
       })
 
-      // Save style data
-      StyleService.saveStyle(
-        styleName, 
-        styleContent,
-        tov || undefined
-      )
+      if (selectedStyle) {
+        // Update existing style
+        StyleService.updateStyle(selectedStyle.name, styleName, styleContent, tov || undefined)
+      } else {
+        // Save new style
+        StyleService.saveStyle(styleName, styleContent, tov || undefined)
+      }
 
       // Refresh saved styles
       const updatedStyles = StyleService.getSavedStyles()
@@ -146,6 +150,7 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
       // Reset form and close dialog
       setStyleName('')
       setStyleContent('')
+      setSelectedStyle(null)
       onClose()
     } catch (error) {
       console.error('Error generating TOV:', error)
@@ -155,6 +160,11 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
     }
   }
 
+  // Determine dialog title based on selected style or new style creation
+  const dialogTitle = selectedStyle 
+    ? `Редактирование стиля: ${selectedStyle.name}` 
+    : 'Новый стиль'
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -163,7 +173,7 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
         <DialogPanel className="w-full max-w-md rounded-lg bg-white shadow-xl max-h-[90vh] flex flex-col">
           <div className="flex items-center justify-between p-4">
             <DialogTitle className="text-lg font-medium text-gray-900">
-              {hasExistingStyle ? 'Мой стиль' : 'Новый стиль'}
+              {dialogTitle}
             </DialogTitle>
             <button
               onClick={onClose}
@@ -225,14 +235,14 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
                   {savedStyles.map((style, index) => (
                     <div 
                       key={index} 
-                      className="flex items-center gap-2 bg-gray-100 hover:bg-violet-100 
-                                 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors"
+                      className={`flex items-center gap-2 
+                        ${selectedStyle?.name === style.name 
+                          ? 'bg-violet-200' 
+                          : 'bg-gray-100 hover:bg-violet-100'} 
+                        rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors`}
                     >
                       <button
-                        onClick={() => {
-                          setStyleName(style.name)
-                          setStyleContent(style.content)
-                        }}
+                        onClick={() => handleStyleSelect(style)}
                         className="flex-grow text-left"
                       >
                         {style.name}
@@ -261,11 +271,21 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
             )}
           </div>
 
-          <div className="p-4">
+          <div className="p-4 flex space-x-2">
+            {selectedStyle && (
+              <button
+                onClick={handleResetSelection}
+                className="flex-grow rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold
+                         text-gray-700 shadow-sm hover:bg-gray-300 focus:outline-none
+                         focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Отменить выбор
+              </button>
+            )}
             <button
               onClick={handleApply}
               disabled={!styleName || !styleContent || isLoading}
-              className="w-full rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold
+              className="flex-grow rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold
                        text-white shadow-sm hover:bg-violet-600 focus:outline-none
                        focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
                        disabled:opacity-50 disabled:cursor-not-allowed
@@ -277,7 +297,7 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
                   <span className="ml-2">Обработка...</span>
                 </>
               ) : (
-                'Добавить'
+                (selectedStyle ? 'Обновить' : 'Добавить')
               )}
             </button>
           </div>

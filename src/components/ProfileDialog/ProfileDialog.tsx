@@ -13,9 +13,7 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [savedProfiles, setSavedProfiles] = useState<ProfileData[]>([])
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-
-  // Check if there are existing profiles
-  const hasExistingProfile = savedProfiles.length > 0
+  const [selectedProfile, setSelectedProfile] = useState<ProfileData | null>(null)
 
   // Load profiles from localStorage when dialog opens
   useEffect(() => {
@@ -23,28 +21,13 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
       const profiles = VectorStorageService.getSavedProfiles()
       setSavedProfiles(profiles)
 
-      // If there are profiles, load the most recent or default one
-      const defaultProfile = VectorStorageService.getDefaultProfile()
-      if (defaultProfile) {
-        setProfileName(defaultProfile.name)
-        setProfileContent(defaultProfile.content)
-      } else {
-        // If no profiles, set default values
-        setDefaultProfile()
-      }
+      // Always reset to empty fields when dialog opens
+      setProfileName('')
+      setProfileContent('')
+      setFiles([])
+      setSelectedProfile(null)
     }
   }, [isOpen])
-
-  // Set default profile if no profiles exist
-  const setDefaultProfile = () => {
-    const defaultProfile = {
-      name: '',
-      content: ''
-    }
-    
-    setProfileName(defaultProfile.name)
-    setProfileContent(defaultProfile.content)
-  }
 
   const handleSetDefaultProfile = (profileName: string) => {
     VectorStorageService.setDefaultProfile(profileName)
@@ -70,11 +53,12 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
     const updatedProfiles = VectorStorageService.getSavedProfiles()
     setSavedProfiles(updatedProfiles)
 
-    // Load the new default profile
-    const newDefaultProfile = VectorStorageService.getDefaultProfile()
-    if (newDefaultProfile) {
-      setProfileName(newDefaultProfile.name)
-      setProfileContent(newDefaultProfile.content)
+    // Reset selection if deleted profile was selected
+    if (selectedProfile?.name === profileName) {
+      setSelectedProfile(null)
+      setProfileName('')
+      setProfileContent('')
+      setFiles([])
     }
   }
 
@@ -89,16 +73,29 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
       const updatedProfiles = VectorStorageService.getSavedProfiles()
       setSavedProfiles(updatedProfiles)
 
-      // Load the new default profile
-      const newDefaultProfile = VectorStorageService.getDefaultProfile()
-      if (newDefaultProfile) {
-        setProfileName(newDefaultProfile.name)
-        setProfileContent(newDefaultProfile.content)
-      }
+      // Reset selection
+      setSelectedProfile(null)
+      setProfileName('')
+      setProfileContent('')
+      setFiles([])
 
       // Reset confirm delete state
       setConfirmDelete(null)
     }
+  }
+
+  const handleProfileSelect = (profile: ProfileData) => {
+    setSelectedProfile(profile)
+    setProfileName(profile.name)
+    setProfileContent(profile.content)
+    setFiles([]) // Reset files when selecting a profile
+  }
+
+  const handleResetSelection = () => {
+    setSelectedProfile(null)
+    setProfileName('')
+    setProfileContent('')
+    setFiles([])
   }
 
   const handleDrop = (e: React.DragEvent) => {
@@ -140,6 +137,17 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
       return
     }
 
+    // Check for duplicate profile name
+    const isDuplicate = savedProfiles.some(
+      profile => profile.name.toLowerCase() === profileName.toLowerCase() && 
+                 profile !== selectedProfile
+    )
+
+    if (isDuplicate) {
+      setError('Профиль с таким именем уже существует')
+      return
+    }
+
     // Check if there are files or profile content
     if (files.length === 0 && !profileContent.trim()) {
       setError('Добавьте файлы или введите описание профиля')
@@ -160,12 +168,22 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
         throw new Error('Не удалось создать векторное хранилище')
       }
 
-      // Save profile data
-      VectorStorageService.saveProfileData(
-        profileName, 
-        profileContent, 
-        vectorStoreId
-      )
+      if (selectedProfile) {
+        // Update existing profile
+        VectorStorageService.updateProfile(
+          selectedProfile.name, 
+          profileName, 
+          profileContent, 
+          vectorStoreId
+        )
+      } else {
+        // Save new profile data
+        VectorStorageService.saveProfileData(
+          profileName, 
+          profileContent, 
+          vectorStoreId
+        )
+      }
 
       // Refresh saved profiles
       const updatedProfiles = VectorStorageService.getSavedProfiles()
@@ -175,6 +193,7 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
       setProfileName('')
       setProfileContent('')
       setFiles([])
+      setSelectedProfile(null)
       onClose()
     } catch (error) {
       console.error('Error processing profile:', error)
@@ -187,6 +206,11 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
     }
   }
 
+  // Determine dialog title based on selected profile or new profile creation
+  const dialogTitle = selectedProfile 
+    ? `Редактирование профиля: ${selectedProfile.name}` 
+    : 'Новый профиль'
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
@@ -195,7 +219,7 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
         <DialogPanel className="w-full max-w-md rounded-lg bg-white shadow-xl max-h-[90vh] flex flex-col">
           <div className="flex items-center justify-between p-4">
             <DialogTitle className="text-lg font-medium text-gray-900">
-              {hasExistingProfile ? 'Мой профиль' : 'Новый профиль'}
+              {dialogTitle}
             </DialogTitle>
             <button
               onClick={onClose}
@@ -257,14 +281,14 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
                   {savedProfiles.map((profile, index) => (
                     <div 
                       key={index} 
-                      className="flex items-center gap-2 bg-gray-100 hover:bg-violet-100 
-                                 rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors"
+                      className={`flex items-center gap-2 
+                        ${selectedProfile?.name === profile.name 
+                          ? 'bg-violet-200' 
+                          : 'bg-gray-100 hover:bg-violet-100'} 
+                        rounded-md px-3 py-1.5 text-sm text-gray-700 transition-colors`}
                     >
                       <button
-                        onClick={() => {
-                          setProfileName(profile.name)
-                          setProfileContent(profile.content)
-                        }}
+                        onClick={() => handleProfileSelect(profile)}
                         className="flex-grow text-left"
                       >
                         {profile.name}
@@ -356,11 +380,21 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
             </button>
           </div>
 
-          <div className="p-4">
+          <div className="p-4 flex space-x-2">
+            {selectedProfile && (
+              <button
+                onClick={handleResetSelection}
+                className="flex-grow rounded-md bg-gray-200 px-3 py-2 text-sm font-semibold
+                         text-gray-700 shadow-sm hover:bg-gray-300 focus:outline-none
+                         focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Отменить выбор
+              </button>
+            )}
             <button
               onClick={handleApply}
               disabled={!profileName || (!files.length && !profileContent.trim()) || isLoading}
-              className="w-full rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold
+              className="flex-grow rounded-md bg-violet-500 px-3 py-2 text-sm font-semibold
                        text-white shadow-sm hover:bg-violet-600 focus:outline-none
                        focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
                        disabled:opacity-50 disabled:cursor-not-allowed
@@ -372,7 +406,7 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
                   <span className="ml-2">Применить...</span>
                 </>
               ) : (
-                'Добавить'
+                (selectedProfile ? 'Обновить' : 'Добавить')
               )}
             </button>
           </div>

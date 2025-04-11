@@ -7,6 +7,11 @@ export interface SavedStyle {
 }
 
 export class StyleService {
+  static getSavedStyles(): SavedStyle[] {
+    const storedStyles = localStorage.getItem('savedStyles')
+    return storedStyles ? JSON.parse(storedStyles) : []
+  }
+
   static saveStyle(
     styleName: string, 
     styleContent: string, 
@@ -30,9 +35,28 @@ export class StyleService {
     localStorage.setItem('savedStyles', JSON.stringify(savedStyles))
   }
 
-  static getSavedStyles(): SavedStyle[] {
-    const storedStyles = localStorage.getItem('savedStyles')
-    return storedStyles ? JSON.parse(storedStyles) : []
+  static updateStyle(
+    oldStyleName: string,
+    newStyleName: string, 
+    styleContent: string, 
+    tov?: string
+  ) {
+    const savedStyles = this.getSavedStyles()
+    
+    const updatedStyles = savedStyles.map(style => {
+      if (style.name === oldStyleName) {
+        return {
+          ...style,
+          name: newStyleName,
+          content: styleContent,
+          tov: tov,
+          createdAt: new Date().toISOString()
+        }
+      }
+      return style
+    })
+
+    localStorage.setItem('savedStyles', JSON.stringify(updatedStyles))
   }
 
   static setDefaultStyle(styleName: string) {

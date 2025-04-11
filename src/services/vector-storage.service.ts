@@ -14,6 +14,11 @@ export interface ProfileData {
 }
 
 export class VectorStorageService {
+  static getSavedProfiles(): ProfileData[] {
+    const storedProfiles = localStorage.getItem('savedProfiles')
+    return storedProfiles ? JSON.parse(storedProfiles) : []
+  }
+
   static async createVectorStore(
     files: File[], 
     profileText: string
@@ -75,19 +80,44 @@ export class VectorStorageService {
     }
 
     const savedProfiles = this.getSavedProfiles()
+    
+    // Check if this is the first profile, if so, set as default
+    if (savedProfiles.length === 0) {
+      profileData.isDefault = true
+    }
+
     savedProfiles.push(profileData)
     localStorage.setItem('savedProfiles', JSON.stringify(savedProfiles))
   }
 
-  static getSavedProfiles(): ProfileData[] {
-    const storedProfiles = localStorage.getItem('savedProfiles')
-    return storedProfiles ? JSON.parse(storedProfiles) : []
+  static updateProfile(
+    oldProfileName: string,
+    newProfileName: string, 
+    profileContent: string, 
+    vectorStoreId: string
+  ) {
+    const savedProfiles = this.getSavedProfiles()
+    
+    const updatedProfiles = savedProfiles.map(profile => {
+      if (profile.name === oldProfileName) {
+        return {
+          ...profile,
+          name: newProfileName,
+          content: profileContent,
+          vectorStoreId: vectorStoreId,
+          createdAt: new Date().toISOString()
+        }
+      }
+      return profile
+    })
+
+    localStorage.setItem('savedProfiles', JSON.stringify(updatedProfiles))
   }
 
   static setDefaultProfile(profileName: string) {
     const savedProfiles = this.getSavedProfiles()
     
-    // Remove previous default flag
+    // Remove previous default flag and set new default
     const updatedProfiles = savedProfiles.map(profile => ({
       ...profile,
       isDefault: profile.name === profileName
@@ -98,13 +128,13 @@ export class VectorStorageService {
 
   static getDefaultProfile(): ProfileData | null {
     const savedProfiles = this.getSavedProfiles()
-    return savedProfiles.find(profile => profile.isDefault) || 
+    
+    // First, try to find an explicitly set default profile
+    const explicitDefault = savedProfiles.find(profile => profile.isDefault)
+    
+    // If no explicit default, return the last profile
+    return explicitDefault || 
            (savedProfiles.length > 0 ? savedProfiles[savedProfiles.length - 1] : null)
-  }
-
-  static getCurrentVectorStoreId(): string | null {
-    const defaultProfile = this.getDefaultProfile()
-    return defaultProfile ? defaultProfile.vectorStoreId : null
   }
 
   static deleteProfile(profileName: string) {
@@ -148,5 +178,10 @@ export class VectorStorageService {
       savedProfiles[savedProfiles.length - 1].isDefault = true
       localStorage.setItem('savedProfiles', JSON.stringify(savedProfiles))
     }
+  }
+
+  static getCurrentVectorStoreId(): string | null {
+    const defaultProfile = this.getDefaultProfile()
+    return defaultProfile ? defaultProfile.vectorStoreId : null
   }
 }
