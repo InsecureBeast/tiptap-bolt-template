@@ -24,9 +24,6 @@ export function getPrompt(tov: string | undefined, vector_store_id: string | nul
 
     Your answer should be written in language of the user's text.
 
-    ###Limitations###
-    1. The text must be between ${min} and ${max} symbols.
-
     ###Result###
     Result: Output your generated text without any additional explanations or comments.
     Important: Wrap your answer in HTML tags.

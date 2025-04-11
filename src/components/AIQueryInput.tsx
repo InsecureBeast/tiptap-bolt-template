@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { Send, Sparkles, X } from 'lucide-react'
+import { SendHorizontal, X } from 'lucide-react'
 import { Editor } from '@tiptap/react'
 import { AiCommandsService } from '../services/ai-commands.service'
+import LoadingSpinner from './Spiner'
 
 interface AIQueryInputProps {
   editor: Editor | null
@@ -68,11 +69,9 @@ export default function AIQueryInput({ editor, onClose }: AIQueryInputProps) {
                        flex items-center justify-center mb-2"
           >
             {isLoading ? (
-              <div className="animate-spin">
-                <Sparkles size={20} />
-              </div>
+              <LoadingSpinner />
             ) : (
-              <Send size={20} />
+              <SendHorizontal size={20} />
             )}
           </button>
         </div>
