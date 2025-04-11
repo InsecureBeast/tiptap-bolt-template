@@ -90,6 +90,7 @@ export default function AiMenuBarCommands({ editor, onAIQueryToggle }: AiCommand
         onClick={handleSpellCheck}
         isActive={isChecking}
         isLoading={isChecking}
+        disabled={editor.getText().length == 0}
         index={21}
         tooltip="Проверить на ошибки"
       />
@@ -100,7 +101,7 @@ export default function AiMenuBarCommands({ editor, onAIQueryToggle }: AiCommand
         onClick={handleStructureText}
         isActive={isStructuring}
         isLoading={isStructuring}
-        disabled={!editor.state.selection.empty}
+        disabled={!editor.state.selection.empty || editor.getText().length == 0}
         index={22}
         tooltip="Структурировать текст"
       />
@@ -115,7 +116,7 @@ export default function AiMenuBarCommands({ editor, onAIQueryToggle }: AiCommand
         icon={Brackets}
         isLoading={isAdapting}
         hasSubMenu={false}
-        isDisabled={!editor.state.selection.empty}
+        isDisabled={!editor.state.selection.empty || editor.getText().length == 0}
       />
     </div>
   )
