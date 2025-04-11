@@ -15,7 +15,7 @@ interface AiMenuProps {
 }
 
 const aiItems: IDropdownItem[] = [
-  { id: 1, title: 'Переписать', icon: Sparkles },
+  //{ id: 1, title: 'Переписать', icon: Sparkles },
   { 
     id: 2, 
     title: 'Дополнить', 
