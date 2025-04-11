@@ -1,6 +1,6 @@
 import { Editor } from '@tiptap/react'
 import { streamResponseText, streamText } from './ai.service'
-import { getPrompt } from '../prompts/generator.prompt'
+import { getPrompt, getRewritePrompt } from '../prompts/generator.prompt'
 import { prompt as checkErrorsPrompt } from '../prompts/check-errors.prompt'
 import { prompt as structureTextPromp } from '../prompts/structure-text,prompt'
 import { getPrompt as getAddTextPrompt } from '../prompts/add-text.prompt'
@@ -18,21 +18,38 @@ export class AiCommandsService {
   static async generateText(editor: Editor, callbacks: AiCommandCallbacks, customPrompt?: string) {
     try {
       const ptov = getProfileAndToV();
+      const selectionText = getSelectionText(editor);
       
       await streamResponseText({
         prompt: customPrompt || "Напиши тестовый текст для проверки редактора.",
         systemPrompt: getPrompt(ptov.tov, ptov.storeId, "500", "2000", ""),
         editor,
-        selection: editor.state.selection,
+        selection: selectionText,
         storeId: ptov.storeId,
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
-        onStartStreming: () => { 
-          const { empty } = editor.state.selection;
-          if (empty)
-            editor.commands.setContent("");
-        },
+      });
+    } catch (error) {
+      console.error('Error generating text:', error);
+      callbacks.onError?.()
+    }
+  }
+
+  static async rewriteText(editor: Editor, callbacks: AiCommandCallbacks) {
+    try {
+      const ptov = getProfileAndToV();
+      const selectionText = getSelectionText(editor);
+      
+      await streamResponseText({
+        prompt: selectionText.text,
+        systemPrompt: getRewritePrompt(ptov.tov, ptov.storeId, null),
+        editor,
+        selection: selectionText,
+        storeId: ptov.storeId,
+        onStart: callbacks.onStart,
+        onFinish: callbacks.onFinish,
+        onError: callbacks.onError,
       });
     } catch (error) {
       console.error('Error generating text:', error);
@@ -71,10 +88,6 @@ export class AiCommandsService {
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
-        onStartStreming: () => { 
-          if (selectionText.empty)
-            editor.commands.setContent("");
-        },
       });
     } catch (error) {
       console.error('Error checking text:', error);
@@ -96,10 +109,6 @@ export class AiCommandsService {
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
-        onStartStreming: () => { 
-          if (selectionText.empty)
-            editor.commands.setContent("");
-        },
       });
     } catch (error) {
       console.error('Error generating additional text:', error);
@@ -119,10 +128,6 @@ export class AiCommandsService {
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
-        onStartStreming: () => { 
-          if (selectionText.empty)
-            editor.commands.setContent("");
-        },
       });
     } catch (error) {
       console.error('Error checking text:', error);
@@ -142,10 +147,6 @@ export class AiCommandsService {
         onStart: callbacks.onStart,
         onFinish: callbacks.onFinish,
         onError: callbacks.onError,
-        onStartStreming: () => { 
-          if (selectionText.empty)
-            editor.commands.setContent("");
-        },
       });
     } catch (error) {
       console.error('Error checking text:', error);

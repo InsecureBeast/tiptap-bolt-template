@@ -15,7 +15,7 @@ interface AiMenuProps {
 }
 
 const aiItems: IDropdownItem[] = [
-  //{ id: 1, title: 'Переписать', icon: Sparkles },
+  { id: 1, title: 'Переписать', icon: WandSparkles },
   { 
     id: 2, 
     title: 'Дополнить', 
@@ -40,7 +40,7 @@ export default function AiBubbleMenu({ editor }: AiMenuProps) {
       
       switch (item.id) {
         case 1:
-          await AiCommandsService.generateText(editor, {
+          await AiCommandsService.rewriteText(editor, {
             onStart: () => setIsLoading(true),
             onFinish: () => setIsLoading(false),
             onError: () => setIsLoading(false)

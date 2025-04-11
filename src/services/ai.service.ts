@@ -51,8 +51,8 @@ export async function streamText({
         isStartStreming = true;
       }
 
-      const chunkContent = chunk.choices[0]?.delta?.content || '';
-      processor.streamInsertHtmlChunk(chunkContent, selection?.from);
+      const content = chunk.choices[0]?.delta?.content || '';
+      processor.streamInsertHtmlChunk(content, selection?.from);
 
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))
