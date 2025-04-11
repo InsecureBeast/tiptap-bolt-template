@@ -14,10 +14,8 @@ export function getPrompt(tov: string | undefined, vector_store_id: string | nul
         Append additional text that logically continues or enhances the original content.
         The supplementary text must be coherent with the tone and context of the input.
         Ensure that the new text does not exceed 300 characters (including spaces).
-
-      Additional Parameters:
-        ${tov ?? `Tone of Voice: ${tov}`}
-        ${vector_store_id ?? `Vector Store ID: ${vector_store_id}`}
+        ${tov ? `Use Tone of Voice: ${tov}`: ''}
+        ${vector_store_id ? `Use vector Store ID: ${vector_store_id} for brand's identity` : ''}
 
       Output:
         Return the revised version of the text that seamlessly merges the original input with the appended portion.

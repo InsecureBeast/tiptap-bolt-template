@@ -17,7 +17,7 @@ export class HtmlStreamProcessor {
    */
   private updateEditorContent(html: string, from: number): void {
     // Clean the received HTML from unnecessary markers (e.g., markdown blocks with ```html)
-    html = html.replace("```html", "").replace("```", "");
+    html = html.replace(/```html|```|\*/g, "");
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
@@ -26,12 +26,18 @@ export class HtmlStreamProcessor {
       .fromSchema(this.editor.schema)
       .parseSlice(doc.body);
 
-    const to = this._isEmpty 
-      ? this.editor.view.state.doc.content.size 
-      : from + this._htmlBuffer.length;
+    let ffrom = 0;
+    let to = this.editor.view.state.doc.content.size;
+    if (!this._isEmpty) {
+      ffrom = from
+      to = ffrom + this._htmlBuffer.length;
+    }
     
+    if (to > this.editor.view.state.doc.content.size)
+      to = this.editor.view.state.doc.content.size;
+
     const transaction = this.editor.view.state.tr
-      .replaceRange(from, to, slice);
+      .replaceRange(ffrom, to, slice);
 
     this.editor.view.dispatch(transaction);
   }

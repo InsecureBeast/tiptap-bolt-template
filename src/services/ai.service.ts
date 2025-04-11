@@ -52,7 +52,7 @@ export async function streamText({
       }
 
       const chunkContent = chunk.choices[0]?.delta?.content || '';
-      processor.streamInsertHtmlChunk(chunkContent, selection?.from, selection?.to);
+      processor.streamInsertHtmlChunk(chunkContent, selection?.from);
 
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))
@@ -107,6 +107,7 @@ export async function streamResponseText({
       stream: true
     })
 
+    const processor = new HtmlStreamProcessor(editor);
     let isStartStreming = false;
     for await (const chunk of stream) {
       if (!isStartStreming) {
@@ -115,11 +116,8 @@ export async function streamResponseText({
       }
 
       const content = 'delta' in chunk ? chunk.delta : '';
-      editor.chain()
-        .focus()
-        .insertContent(content, { updateSelection: true })
-          .run()
-
+      processor.streamInsertHtmlChunk(content, selection?.from);
+      
       // Add a small delay to simulate rendering before processing the next chunk
       await new Promise(resolve => setTimeout(resolve, 5))
     }

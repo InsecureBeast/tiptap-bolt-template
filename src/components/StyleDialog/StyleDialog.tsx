@@ -277,7 +277,7 @@ export default function StyleDialog({ isOpen, onClose, onApply }: StyleDialogPro
                   <span className="ml-2">Обработка...</span>
                 </>
               ) : (
-                'Применить'
+                'Добавить'
               )}
             </button>
           </div>

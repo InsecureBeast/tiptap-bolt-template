@@ -10,6 +10,7 @@ export interface IMenuButtonProps {
   tooltip: string;
   title?: string;
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const MenuButton: React.FC<IMenuButtonProps> = ({ 
@@ -19,7 +20,8 @@ const MenuButton: React.FC<IMenuButtonProps> = ({
   title, 
   icon: Icon, 
   tooltip,
-  isLoading = false
+  isLoading = false,
+  disabled = false
 }) => {
   return (
     <button
@@ -27,8 +29,9 @@ const MenuButton: React.FC<IMenuButtonProps> = ({
       onClick={onClick}
       title={title || tooltip} // Use tooltip as fallback for title
       data-tooltip={tooltip}
+      disabled={disabled}
       className={`
-      p-2 rounded-md transition-all duration-200 flex items-center justify-center
+        p-2 rounded-md transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed
         ${
           isActive
           ? 'bg-violet-200'

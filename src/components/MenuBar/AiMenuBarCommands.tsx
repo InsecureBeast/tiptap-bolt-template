@@ -75,6 +75,7 @@ export default function AiMenuBarCommands({ editor }: AiCommandsProps) {
         onClick={handleStructureText}
         isActive={isStructuring}
         isLoading={isStructuring}
+        disabled={!editor.state.selection.empty}
         index={22}
         tooltip="Структурировать текст"
       />

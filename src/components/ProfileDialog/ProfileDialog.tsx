@@ -372,7 +372,7 @@ export default function ProfileDialog({ isOpen, onClose }: { isOpen: boolean, on
                   <span className="ml-2">Применить...</span>
                 </>
               ) : (
-                'Применить'
+                'Добавить'
               )}
             </button>
           </div>

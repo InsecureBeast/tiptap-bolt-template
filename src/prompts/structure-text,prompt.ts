@@ -19,5 +19,4 @@ export const prompt = `
 
   Remember: the main goal is to restore the text's structure by ensuring its logical division into 
   semantic blocks and making it user-friendly.
-
   `;

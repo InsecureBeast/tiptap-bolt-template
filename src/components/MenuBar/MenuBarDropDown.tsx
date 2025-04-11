@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import LoadingSpinner from "../Spiner";
 
 export interface IDropdownItem {
   id: number;
   title: string;
   icon: LucideIcon;
+  subItems?: IDropdownItem[];
 }
 
 interface IDropDownProps {
@@ -17,6 +18,7 @@ interface IDropDownProps {
   isChangeSelected: boolean;
   icon: LucideIcon;
   isLoading?: boolean;
+  hasSubMenu?: boolean;
 }
 
 const MenuBarDropDown: React.FC<IDropDownProps> = ({ 
@@ -27,9 +29,11 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
   title, 
   isChangeSelected, 
   icon: Icon,
-  isLoading = false 
+  isLoading = false,
+  hasSubMenu = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeSubMenu, setActiveSubMenu] = useState<number | null>(null);
   const [selectedItem, setSelectedItem] = useState<IDropdownItem | null>(() => {
     if (selectId) {
       const preselectedItem = items.find((item) => {
@@ -45,14 +49,27 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleSelect = (item: IDropdownItem) => {
-    setSelectedItem(item);
-    onSelect(item);
+    if (item.subItems) {
+      // If item has subitems, open submenu
+      setActiveSubMenu(item.id);
+    } else {
+      // If no subitems, select the item
+      setSelectedItem(item);
+      onSelect(item);
+      setIsOpen(false);
+    }
+  }
+
+  const handleSubItemSelect = (subItem: IDropdownItem) => {
+    setSelectedItem(subItem);
+    onSelect(subItem);
     setIsOpen(false);
-  };
+  }
 
   const handleClickOutside = (event: MouseEvent) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
       setIsOpen(false);
+      setActiveSubMenu(null);
     }
   };
 
@@ -63,19 +80,8 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
     };
   }, []);
 
-  useEffect(() => {
-    if (!isChangeSelected)
-      return;
-
-    if (selectedItem)
-      setSelectedItem(selectedItem);
-    else 
-      setSelectedItem(items[0]);
-
-  }, [selectId, items]);
-
   return (
-    <div className="" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen((prev) => !prev)}
         className={`flex items-center p-2 rounded-md hover:bg-gray-100 transition-colors 
@@ -83,34 +89,56 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
                   ${isActive ? "bg-violet-200 text-white" : "bg-white text-gray-700"}`
                 }
       >
-        { isChangeSelected && selectedItem ? (
-          <span className="mr-2">
-            <selectedItem.icon size={20} />
-          </span>
-        ) : (
-          <>
-            <span className="mr-2">
-              {isLoading ? <LoadingSpinner /> : <Icon size={20} />}
-            </span>
-            {title && <span className="text-sm text-gray-700 text-nowrap">{title}</span>}
-          </>
-        )}
-
+        <span className="mr-2">
+          {isLoading ? <LoadingSpinner /> : <Icon size={20} />}
+        </span>
+        {title && <span className="text-sm text-gray-700 text-nowrap">{title}</span>}
         <ChevronDown size={20} className="text-gray-500 ml-2" />
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden w-64">
+        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg w-64 z-50">
           {items.map((item) => (
-            <button
+            <div 
               key={item.id}
-              onClick={() => handleSelect(item)}
-              className={`w-full text-left px-4 py-2 flex items-center hover:bg-gray-100 transition-colors duration-200 
-                ${isChangeSelected && selectedItem?.id === item.id ? "bg-violet-200" : "text-gray-700"}`}
+              className="relative group"
             >
-              <span className="mr-2"><item.icon size={16} /></span>
-              <span className="text-nowrap">{item.title}</span>
-            </button>
+              <button
+                onClick={() => handleSelect(item)}
+                className={`w-full text-left px-4 py-2 flex items-center justify-between hover:bg-gray-100 transition-colors duration-200 
+                  ${activeSubMenu === item.id ? "bg-violet-50" : "text-gray-700"}`}
+                onMouseEnter={() => hasSubMenu && setActiveSubMenu(item.id)}
+              >
+                <div className="flex items-center">
+                  <span className="mr-2"><item.icon size={16} /></span>
+                  <span className="text-nowrap">{item.title}</span>
+                </div>
+                {item.subItems && <ChevronRight size={16} className="text-gray-400" />}
+              </button>
+
+              {/* Submenu */}
+              {hasSubMenu && item.subItems && (
+                <div 
+                  className={`
+                    absolute top-0 left-full bg-white border border-gray-200 
+                    rounded-md shadow-lg overflow-hidden w-64 z-50
+                    ${activeSubMenu === item.id ? 'block' : 'hidden'}
+                    group-hover:block
+                  `}
+                >
+                  {item.subItems.map((subItem) => (
+                    <button
+                      key={subItem.id}
+                      onClick={() => handleSubItemSelect(subItem)}
+                      className="w-full text-left px-4 py-2 flex items-center hover:bg-gray-100 transition-colors duration-200 text-gray-700"
+                    >
+                      <span className="mr-2"><subItem.icon size={16} /></span>
+                      <span className="text-nowrap">{subItem.title}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

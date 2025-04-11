@@ -81,14 +81,14 @@ export class AiCommandsService {
     }
   }
 
-  static async addText(editor: Editor, callbacks: AiCommandCallbacks): Promise<void> {
+  static async addText(editor: Editor, callbacks: AiCommandCallbacks, withStore: boolean = false): Promise<void> {
     try {
       const ptov = getProfileAndToV();
       const selectionText = getSelectionText(editor);
       
       await streamResponseText({
         prompt: selectionText.text,
-        systemPrompt: getAddTextPrompt(ptov.tov, null),
+        systemPrompt: getAddTextPrompt(ptov.tov, withStore ? ptov.storeId : null),
         editor,
         selection: selectionText,
         storeId: ptov.storeId,
