@@ -20,6 +20,7 @@ export function getPrompt(tov: string | undefined, vector_store_id: string | nul
       Output:
         Return the revised version of the text that seamlessly merges the original input with the appended portion.
         Do not include any commentary or error report—only the fully updated text should be output.
+        Your answer should be written in the language of the user's text.
 
       Example:
         Input: "This technology has revolutionized the way we communicate"

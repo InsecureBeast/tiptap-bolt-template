@@ -3,7 +3,7 @@ import { ChevronDown, ChevronRight, LucideIcon } from "lucide-react";
 import LoadingSpinner from "../Spiner";
 
 export interface IDropdownItem {
-  id: number;
+  id: string;
   title: string;
   icon: LucideIcon;
   subItems?: IDropdownItem[];
@@ -35,7 +35,7 @@ const MenuBarDropDown: React.FC<IDropDownProps> = ({
   isDisabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeSubMenu, setActiveSubMenu] = useState<number | null>(null);
+  const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<IDropdownItem | null>(() => {
     if (selectId) {
       const preselectedItem = items.find((item) => {

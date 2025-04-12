@@ -49,10 +49,10 @@ export function getRewritePrompt(tov: string | undefined, vector_store_id: strin
     3. Rewrite the given text to match the brand's identity and tone, while keeping the original meaning and structure.
     4. Do not change the factual content or add new ideas unless they are necessary for clarity or tone alignment.
 
-    Your answer should be written in the language of the user's text.
-
     ###Result###
     Result: Output your rewritten text without any additional explanations or comments.
+    Important: Your answer should be written in the language of the user's text.
+
     Important: Wrap your answer in HTML tags.
   `;
 };
