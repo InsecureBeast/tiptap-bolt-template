@@ -153,4 +153,23 @@ export class AiCommandsService {
       callbacks.onError?.()
     }
   }
+
+  static async adaptContentCustom(editor: Editor, customRules: string, callbacks: AiCommandCallbacks) {
+    try {
+      const selectionText = getSelectionText(editor);
+
+      await streamText({
+        prompt: `Custom Adaptation Rules: ${customRules}. Input text: ${selectionText.text}`,
+        systemPrompt: adaptionSystemPrompt,
+        editor,
+        selection: selectionText,
+        onStart: callbacks.onStart,
+        onFinish: callbacks.onFinish,
+        onError: callbacks.onError,
+      });
+    } catch (error) {
+      console.error('Error checking text:', error);
+      callbacks.onError?.()
+    }
+  }
 }
