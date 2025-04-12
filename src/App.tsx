@@ -5,35 +5,33 @@ import Onboarding from './components/Onbording/Onbording';
 function App() {
   const [currentContent, setCurrentContent] = useState<string>()
 
-  const handleContentChange = async (event: React.FormEvent<HTMLDivElement>) => {
-    const newContent = event.currentTarget.innerHTML;
+  const handleContentChange = async (newContent: string) => {
     localStorage.setItem('currentContent', newContent);
-    //setCurrentContent(newContent);
-    console.log('Текущее содержимое:', newContent);
   }
 
   useEffect(() => {
-    // Initial load of content
-    const loadContent = async () => {
-      try {
-        const response = await fetch('../public/data.json');
-        const data = await response.json();
-        const storedContent = localStorage.getItem('currentContent');
-        if (storedContent !== data.content) {
-          setCurrentContent(data.content);
-          localStorage.setItem('currentContent', data.content);
-        }
-      } catch (error) {
-        console.error('Error loading content:', error);
+    // Загрузка контента при инициализации
+    const loadContent = () => {
+      const storedContent = localStorage.getItem('currentContent');
+      if (storedContent) {
+        setCurrentContent(storedContent);
       }
     };
 
     loadContent();
 
-    // Poll for changes every 2 seconds
-    //const interval = setInterval(loadContent, 2000);
+    // Обработчик события для синхронизации между вкладками
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === 'currentContent') {
+        loadContent();
+      }
+    };
 
-    //return () => clearInterval(interval);
+    window.addEventListener('storage', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   return (

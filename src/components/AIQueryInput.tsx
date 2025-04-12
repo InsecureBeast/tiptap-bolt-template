@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { SendHorizontal, X } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
 import { Editor } from '@tiptap/react'
 import { AiCommandsService } from '../services/ai-commands.service'
 import LoadingSpinner from './Spiner'
@@ -71,7 +71,7 @@ export default function AIQueryInput({ editor, onClose }: AIQueryInputProps) {
             {isLoading ? (
               <LoadingSpinner />
             ) : (
-              <SendHorizontal size={20} />
+              <ArrowRight size={20} />
             )}
           </button>
         </div>

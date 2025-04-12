@@ -34,12 +34,12 @@ export class HtmlStreamProcessor {
     if (this._currentInsertPosition === null) {
       if (!this._isEmpty) {
         // Get selection size and save positions for replacement
-        const selectionSize = this.editor.state.selection.content().content.size;
+        const selectionSize = this.editor.state.selection.content().size;
         this._currentInsertPosition = from;
         this._replaceEndPosition = from + selectionSize;
       } else {
         this._currentInsertPosition = 0;
-        this._replaceEndPosition = this.editor.state.selection.content().content.size;
+        this._replaceEndPosition = this.editor.state.selection.content().size;
       }
     }
 
